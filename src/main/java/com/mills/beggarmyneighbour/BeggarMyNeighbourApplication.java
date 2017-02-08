@@ -23,10 +23,8 @@ public class BeggarMyNeighbourApplication {
         {
             Deque<Card> deck = CardOperations.getDeck();
             Map<Player, Deque<Card>> playerHands = CardOperations.dealCards(deck);
-            Player loser = GamePlay.playGame(deck, playerHands);
-            EnumSet<Player> allPlayers = EnumSet.allOf(Player.class);
-            allPlayers.remove(loser);
-            Player winner =  allPlayers.iterator().next();
+
+            Player winner = new GamePlay(deck, playerHands).playGame();
             results.add(winner);
         }
         logger.warning(results.toString());

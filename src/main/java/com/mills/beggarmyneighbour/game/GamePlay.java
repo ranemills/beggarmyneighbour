@@ -6,6 +6,7 @@ import com.mills.beggarmyneighbour.models.Card;
 import com.mills.beggarmyneighbour.models.Player;
 
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -21,43 +22,63 @@ public class GamePlay {
                                                                                                    .put(13, 3)
                                                                                                    .build();
 
-    public static Player playGame(Deque<Card> deck, Map<Player, Deque<Card>> playerHands) {
+    private Boolean isPenalty = false;
+    private Map<Player, Deque<Card>> playerHands;
+    private Deque<Card> deck;
 
-        boolean isPenalty = false;
+    private Iterator<Player> playerIterator;
 
-        for (Player player : Iterables.cycle(Player.values())) {
-            int cardsToPlay = 1;
+    public GamePlay(Deque<Card> deck, Map<Player, Deque<Card>> playerHands)
+    {
+        this.playerHands = playerHands;
+        this.deck = deck;
+        this.playerIterator = Iterables.cycle(Player.values()).iterator();
+    }
 
-            logger.warning(String.format("Turn of player %s", player));
+    public boolean playNextTurn()
+    {
+        Player player = playerIterator.next();
+        int cardsToPlay = 1;
 
-            Deque<Card> hand = playerHands.get(player);
+        logger.warning(String.format("Turn of player %s", player));
 
-            if (!deck.isEmpty()) {
-                Card topCard = deck.peek();
-                logger.warning(String.format("Top card is %s", topCard));
+        Deque<Card> hand = playerHands.get(player);
 
-                if (PENALTIES.keySet().contains(topCard.getValue())) {
-                    isPenalty = true;
-                    cardsToPlay = PENALTIES.get(topCard.getValue());
-                    logger.warning(String.format("Player %s is paying a penalty of %s", player, cardsToPlay));
-                } else if (isPenalty) {
-                    logger.warning(String.format("Player %s is picking up the deck", player));
-                    while (!deck.isEmpty()) {
-                        hand.addLast(deck.pop());
-                    }
-                    isPenalty = false;
+        if (!deck.isEmpty()) {
+            Card topCard = deck.peek();
+            logger.warning(String.format("Top card is %s", topCard));
+
+            if (PENALTIES.keySet().contains(topCard.getValue())) {
+                isPenalty = true;
+                cardsToPlay = PENALTIES.get(topCard.getValue());
+                logger.warning(String.format("Player %s is paying a penalty of %s", player, cardsToPlay));
+            } else if (isPenalty) {
+                logger.warning(String.format("Player %s is picking up the deck", player));
+                while (!deck.isEmpty()) {
+                    hand.addLast(deck.pop());
                 }
-            }
-
-            playCards(deck, hand, cardsToPlay);
-
-            if (hand.isEmpty()) {
-                logger.warning(String.format("End of game. Player %s lost.", player));
-                return player;
+                isPenalty = false;
             }
         }
 
-        return null;
+        playCards(deck, hand, cardsToPlay);
+
+        if (hand.isEmpty()) {
+            logger.warning(String.format("End of game. Player %s lost.", player));
+            return false;
+        }
+
+        return true;
+    }
+
+    public Player playGame()
+    {
+        while(playNextTurn()) {}
+        return playerIterator.next();
+    }
+
+    public static Player playGame(Deque<Card> deck, Map<Player, Deque<Card>> playerHands) {
+        return new GamePlay(deck, playerHands).playGame();
     }
 
     private static void playCards(Deque<Card> deck, Deque<Card> playerHand, Integer cardsToPlay)
