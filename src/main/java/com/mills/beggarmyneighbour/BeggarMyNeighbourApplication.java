@@ -20,19 +20,23 @@ public class BeggarMyNeighbourApplication {
     public static void main(String[] args) {
         List<GameStats> results = new ArrayList<>();
 
-        for(int i=0; i<10; i++)
-        {
+        for (int i = 0; i < 100; i++) {
             List<CardValue> deck = CardOperations.getDeck();
-            Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
-
-            GameStats gameStats = GamePlay.playGame(playerHands);
-            gameStats.setInitialDeck(deck);
-            results.add(gameStats);
+            results.add(generateAndPlayGame(deck));
         }
 
-        for(GameStats stats : results) {
-            logger.info(stats.toString());
+        for (GameStats stats : results) {
+            logger.error(stats.toString());
         }
+    }
+
+    private static GameStats generateAndPlayGame(List<CardValue> deck)
+    {
+        Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
+
+        GameStats gameStats = GamePlay.playGame(playerHands);
+        gameStats.setInitialDeck(deck);
+        return gameStats;
     }
 
 

@@ -30,7 +30,17 @@ public class GameStats {
                 .append("tricks", tricks)
                 .append("cards", cards)
                 .append("winner", winner)
-                .append("initialDeck", initialDeck)
+                .append("initialDeck", initialDeckToString())
                 .toString();
+    }
+
+    private String initialDeckToString()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(CardValue value : initialDeck)
+        {
+            stringBuilder.append(value.getAsciiChar());
+        }
+        return stringBuilder.toString();
     }
 }

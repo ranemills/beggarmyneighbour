@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,13 @@ public class CardOperations {
         List<CardValue> deck = new ArrayList<>();
 
         for (int i=0; i<4; i++) {
-            for (int value = 1; value <= 9; value++) {
+            for (int value = 2; value <= 10; value++) {
                 deck.add(CardValue.NON_FACE);
             }
-            Collections.addAll(deck, CardValue.values());
+            for(CardValue cardValue : EnumSet.of(CardValue.ACE, CardValue.KING, CardValue.QUEEN, CardValue.JACK))
+            {
+                deck.add(cardValue);
+            }
         }
         Collections.shuffle(deck);
         return deck;
