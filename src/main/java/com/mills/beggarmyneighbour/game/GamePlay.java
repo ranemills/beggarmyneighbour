@@ -51,7 +51,7 @@ public class GamePlay {
         int cardsToPlay = computeCardsToPlay(deck);
 
         if (!playCards(deck, hand, cardsToPlay)) {
-            logger.info(String.format("End of game. Player %s lost.", player));
+            logger.trace(String.format("End of game. Player %s lost.", player));
             return false;
         }
 
@@ -82,7 +82,7 @@ public class GamePlay {
     public GameStats playGame() {
         Deque<CardValue> deck = new ArrayDeque<>();
         for (Player player : Iterables.cycle(Player.values())) {
-            logger.info(String.format("Turn of %s", player));
+            logger.trace(String.format("Turn of %s", player));
             if (!playTurn(player, deck)) {
                 break;
             }
@@ -122,22 +122,22 @@ public class GamePlay {
     }
 
     Boolean playCards(Deque<CardValue> deck, Deque<CardValue> playerHand, Integer cardsToPlay) {
-        logger.info(String.format("Needs to play %s cards", cardsToPlay));
+        logger.trace(String.format("Needs to play %s cards", cardsToPlay));
 
         for (int i = 0; i < cardsToPlay; i++) {
             numberCards++;
             if (playerHand.isEmpty()) {
-                logger.info("Out of cards");
+                logger.trace("Out of cards");
                 return false;
             }
             CardValue card = playSingleCard(deck, playerHand);
-            logger.info(String.format("Plays card %s", card));
+            logger.trace(String.format("Plays card %s", card));
 
             if (!card.equals(CardValue.NON_FACE)) {
                 return true;
             }
         }
-        logger.info("End of turn");
+        logger.trace("End of turn");
         return true;
     }
 }
