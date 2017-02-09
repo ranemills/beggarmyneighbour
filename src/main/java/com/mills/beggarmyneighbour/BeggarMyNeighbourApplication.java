@@ -7,7 +7,6 @@ import com.mills.beggarmyneighbour.utils.CardOperations;
 
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -24,7 +23,7 @@ public class BeggarMyNeighbourApplication {
             Deque<Card> deck = CardOperations.getDeck();
             Map<Player, Deque<Card>> playerHands = CardOperations.dealCards(deck);
 
-            Player winner = new GamePlay(deck, playerHands).playGame();
+            Player winner = GamePlay.playGame(playerHands);
             results.add(winner);
         }
         logger.warning(results.toString());
