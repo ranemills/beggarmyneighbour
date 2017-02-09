@@ -23,6 +23,9 @@ public class GamePlay {
     private Boolean isPenalty = false;
     private Map<Player, Deque<Card>> playerHands;
 
+    private int numberTricks = 0;
+    private int numberCards = 0;
+
     private Iterator<Player> playerIterator;
 
     GamePlay() {
@@ -34,7 +37,7 @@ public class GamePlay {
         this.playerIterator = Iterables.cycle(Player.values()).iterator();
     }
 
-    public static Player playGame(Map<Player, Deque<Card>> playerHands) {
+    public static GameStats playGame(Map<Player, Deque<Card>> playerHands) {
         return new GamePlay(playerHands).playGame();
     }
 
@@ -73,9 +76,10 @@ public class GamePlay {
         while (!deck.isEmpty()) {
             hand.addLast(deck.removeLast());
         }
+        numberTricks++;
     }
 
-    public Player playGame() {
+    public GameStats playGame() {
         Deque<Card> deck = new ArrayDeque<>();
         for (Player player : Iterables.cycle(Player.values())) {
             logger.warning(String.format("Turn of %s", player));
@@ -83,7 +87,9 @@ public class GamePlay {
                 break;
             }
         }
-        return playerIterator.next();
+        Player winner = playerIterator.next();
+
+        return new GameStats(numberTricks, numberCards, winner);
     }
 
     public Boolean getPenaltyMode() {
@@ -124,6 +130,7 @@ public class GamePlay {
         logger.warning(String.format("Needs to play %s cards", cardsToPlay));
 
         for (int i = 0; i < cardsToPlay; i++) {
+            numberCards++;
             if (playerHand.isEmpty()) {
                 logger.warning("Out of cards");
                 return false;
