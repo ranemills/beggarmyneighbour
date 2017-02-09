@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CardOperations {
-    public static List<CardValue> getDeck()
+    public static List<CardValue> getShuffledDeck()
     {
         List<CardValue> deck = new ArrayList<>();
 
@@ -60,5 +60,14 @@ public class CardOperations {
             }
         }
         return true;
+    }
+
+    public static String deckToString(List<CardValue> deck)
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (CardValue value : deck) {
+            stringBuilder.append(value.getAsciiChar());
+        }
+        return stringBuilder.toString();
     }
 }

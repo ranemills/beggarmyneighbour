@@ -3,7 +3,6 @@ package com.mills.beggarmyneighbour.game;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -32,17 +31,10 @@ public class GameStats {
         this.winner = winner;
     }
 
-    public void setInitialDeck(List<CardValue> initialDeck)
-    {
-        this.initialDeck = initialDeck;
-        this.deckRepresentation = initialDeckToString();
-    }
-
     private String initialDeckToString()
     {
         StringBuilder stringBuilder = new StringBuilder();
-        for(CardValue value : initialDeck)
-        {
+        for (CardValue value : initialDeck) {
             stringBuilder.append(value.getAsciiChar());
         }
         return stringBuilder.toString();
@@ -51,12 +43,36 @@ public class GameStats {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("tricks", tricks)
-                .append("cards", cards)
-                .append("winner", winner)
-                .append("initialDeck", initialDeckToString())
-                .toString();
+                   .append("tricks", tricks)
+                   .append("cards", cards)
+                   .append("winner", winner)
+                   .append("initialDeck", initialDeckToString())
+                   .toString();
     }
 
+    public int getTricks() {
+        return tricks;
+    }
 
+    public int getCards() {
+        return cards;
+    }
+
+    public Player getWinner() {
+        return winner;
+    }
+
+    public List<CardValue> getInitialDeck() {
+        return initialDeck;
+    }
+
+    public void setInitialDeck(List<CardValue> initialDeck)
+    {
+        this.initialDeck = initialDeck;
+        this.deckRepresentation = initialDeckToString();
+    }
+
+    public String getDeckRepresentation() {
+        return deckRepresentation;
+    }
 }
