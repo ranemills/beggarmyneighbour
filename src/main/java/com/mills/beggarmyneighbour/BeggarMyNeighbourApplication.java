@@ -23,7 +23,7 @@ public class BeggarMyNeighbourApplication {
         for(int i=0; i<10; i++)
         {
             List<Card> deck = CardOperations.getDeck();
-            Map<Player, Deque<Card>> playerHands = CardOperations.dealCards(deck);
+            Map<Player, Deque<Card>> playerHands = CardOperations.splitCards(deck);
 
             GameStats gameStats = GamePlay.playGame(playerHands);
             results.add(gameStats);
