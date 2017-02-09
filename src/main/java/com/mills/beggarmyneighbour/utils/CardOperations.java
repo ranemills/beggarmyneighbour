@@ -1,5 +1,6 @@
 package com.mills.beggarmyneighbour.utils;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
@@ -19,14 +20,16 @@ public class CardOperations {
     {
         List<CardValue> deck = new ArrayList<>();
 
+        for(int i=0; i<36; i++)
+        {
+            deck.add(CardValue.NON_FACE);
+        }
+
         for (int i=0; i<4; i++) {
-            for (int value = 2; value <= 10; value++) {
-                deck.add(CardValue.NON_FACE);
-            }
-            for(CardValue cardValue : EnumSet.of(CardValue.ACE, CardValue.KING, CardValue.QUEEN, CardValue.JACK))
-            {
-                deck.add(cardValue);
-            }
+            deck.add(CardValue.ACE);
+            deck.add(CardValue.KING);
+            deck.add(CardValue.QUEEN);
+            deck.add(CardValue.JACK);
         }
         Collections.shuffle(deck);
         return deck;
@@ -44,5 +47,18 @@ public class CardOperations {
         }
 
         return playerHands;
+    }
+
+    public static Boolean isValidDeck(List<CardValue> inDeck)
+    {
+        List<CardValue> deck = new ArrayList<>(inDeck);
+        for(CardValue cardValue : EnumSet.allOf(CardValue.class))
+        {
+            for(int i=0; i<cardValue.getRequiredInDeck(); i++)
+            {
+                if(!deck.remove(cardValue)) { return false; }
+            }
+        }
+        return true;
     }
 }
