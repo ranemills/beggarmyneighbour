@@ -8,9 +8,6 @@ import com.mills.beggarmyneighbour.models.Player;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * Created by ryan on 08/02/17.
- */
 public class GamePlay {
     private static final Logger logger = Logger.getLogger("GamePlay");
 

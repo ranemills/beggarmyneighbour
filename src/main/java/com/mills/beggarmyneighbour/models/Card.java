@@ -2,9 +2,6 @@ package com.mills.beggarmyneighbour.models;
 
 import java.util.Objects;
 
-/**
- * Created by ryan on 08/02/17.
- */
 public class Card {
     private final Integer value;
     private final Suit suit;

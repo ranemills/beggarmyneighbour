@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-/**
- * Created by ryan on 08/02/17.
- */
 public class CardOperations {
     private static final Logger logger = Logger.getLogger("CardOperations");
 
