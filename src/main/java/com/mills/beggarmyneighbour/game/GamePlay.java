@@ -5,11 +5,14 @@ import com.google.common.collect.Iterables;
 import com.mills.beggarmyneighbour.models.Card;
 import com.mills.beggarmyneighbour.models.Player;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
-import java.util.logging.Logger;
 
 public class GamePlay {
-    private static final Logger logger = Logger.getLogger("GamePlay");
+    private static final Logger logger = LoggerFactory.getLogger(GamePlay.class);
+
 
     private static final Map<Integer, Integer> PENALTIES = ImmutableMap.<Integer, Integer>builder().put(1, 4)
             .put(11, 1)
@@ -48,7 +51,7 @@ public class GamePlay {
         int cardsToPlay = computeCardsToPlay(deck);
 
         if (!playCards(deck, hand, cardsToPlay)) {
-            logger.warning(String.format("End of game. Player %s lost.", player));
+            logger.info(String.format("End of game. Player %s lost.", player));
             return false;
         }
 
@@ -79,7 +82,7 @@ public class GamePlay {
     public GameStats playGame() {
         Deque<Card> deck = new ArrayDeque<>();
         for (Player player : Iterables.cycle(Player.values())) {
-            logger.warning(String.format("Turn of %s", player));
+            logger.info(String.format("Turn of %s", player));
             if (!playTurn(player, deck)) {
                 break;
             }
@@ -124,22 +127,22 @@ public class GamePlay {
     }
 
     Boolean playCards(Deque<Card> deck, Deque<Card> playerHand, Integer cardsToPlay) {
-        logger.warning(String.format("Needs to play %s cards", cardsToPlay));
+        logger.info(String.format("Needs to play %s cards", cardsToPlay));
 
         for (int i = 0; i < cardsToPlay; i++) {
             numberCards++;
             if (playerHand.isEmpty()) {
-                logger.warning("Out of cards");
+                logger.info("Out of cards");
                 return false;
             }
             Card card = playSingleCard(deck, playerHand);
-            logger.warning(String.format("Plays card %s", card));
+            logger.info(String.format("Plays card %s", card));
 
             if (PENALTIES.keySet().contains(card.getValue())) {
                 return true;
             }
         }
-        logger.warning("End of turn");
+        logger.info("End of turn");
         return true;
     }
 }
