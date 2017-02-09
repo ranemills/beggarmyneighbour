@@ -26,6 +26,7 @@ public class BeggarMyNeighbourApplication {
             Map<Player, Deque<Card>> playerHands = CardOperations.splitCards(deck);
 
             GameStats gameStats = GamePlay.playGame(playerHands);
+            gameStats.setInitialDeck(deck);
             results.add(gameStats);
         }
 

@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import com.mills.beggarmyneighbour.models.Card;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.models.Suit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class CardOperations {
     {
         int numberPlayers = Player.values().length;
         List<Player> players = Arrays.asList(Player.values());
-        List<List<Card>> partitions = Lists.partition(deck, Player.values().length);
+        List<List<Card>> partitions = Lists.partition(deck, deck.size()/numberPlayers);
 
         Map<Player, Deque<Card>> playerHands = new HashMap<>();
         for (int i = 0; i < numberPlayers; i++) {
