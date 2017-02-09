@@ -2,7 +2,6 @@ package com.mills.beggarmyneighbour.game;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.mills.beggarmyneighbour.models.Card;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 
@@ -22,7 +21,7 @@ public class GamePlay {
             .build();
 
     private Boolean isPenalty = false;
-    private Map<Player, Deque<Card>> playerHands;
+    private Map<Player, Deque<CardValue>> playerHands;
 
     private int numberTricks = 0;
     private int numberCards = 0;
@@ -30,20 +29,20 @@ public class GamePlay {
     private Iterator<Player> playerIterator;
 
     GamePlay() {
-        this(new HashMap<Player, Deque<Card>>());
+        this(new HashMap<Player, Deque<CardValue>>());
     }
 
-    public GamePlay(Map<Player, Deque<Card>> playerHands) {
+    public GamePlay(Map<Player, Deque<CardValue>> playerHands) {
         this.playerHands = playerHands;
         this.playerIterator = Iterables.cycle(Player.values()).iterator();
     }
 
-    public static GameStats playGame(Map<Player, Deque<Card>> playerHands) {
+    public static GameStats playGame(Map<Player, Deque<CardValue>> playerHands) {
         return new GamePlay(playerHands).playGame();
     }
 
-    boolean playTurn(Player player, Deque<Card> deck) {
-        Deque<Card> hand = playerHands.get(player);
+    boolean playTurn(Player player, Deque<CardValue> deck) {
+        Deque<CardValue> hand = playerHands.get(player);
 
         if (!deck.isEmpty()) {
             setPenaltyMode(dealWithPenaltyMode(deck, hand));
@@ -59,8 +58,8 @@ public class GamePlay {
         return true;
     }
 
-    boolean dealWithPenaltyMode(Deque<Card> deck, Deque<Card> hand) {
-        boolean topCardIsPenalty = !deck.peek().getValue().equals(CardValue.NON_FACE);
+    boolean dealWithPenaltyMode(Deque<CardValue> deck, Deque<CardValue> hand) {
+        boolean topCardIsPenalty = !deck.peek().equals(CardValue.NON_FACE);
 
         if (!topCardIsPenalty && getPenaltyMode()) {
             pickUpDeck(deck, hand);
@@ -73,7 +72,7 @@ public class GamePlay {
         return false;
     }
 
-    void pickUpDeck(Deque<Card> deck, Deque<Card> hand) {
+    void pickUpDeck(Deque<CardValue> deck, Deque<CardValue> hand) {
         while (!deck.isEmpty()) {
             hand.addLast(deck.removeLast());
         }
@@ -81,7 +80,7 @@ public class GamePlay {
     }
 
     public GameStats playGame() {
-        Deque<Card> deck = new ArrayDeque<>();
+        Deque<CardValue> deck = new ArrayDeque<>();
         for (Player player : Iterables.cycle(Player.values())) {
             logger.info(String.format("Turn of %s", player));
             if (!playTurn(player, deck)) {
@@ -101,12 +100,11 @@ public class GamePlay {
         isPenalty = penaltyMode;
     }
 
-    Integer computeCardsToPlay(Deque<Card> deck) {
+    Integer computeCardsToPlay(Deque<CardValue> deck) {
         if (deck.isEmpty()) {
             return 1;
         } else {
-            Card topCard = deck.peek();
-            return topCard.getValue().getPenalty();
+            return deck.peek().getPenalty();
         }
     }
 
@@ -117,13 +115,13 @@ public class GamePlay {
      * @param playerHand
      * @return The card that was played
      */
-    Card playSingleCard(Deque<Card> deck, Deque<Card> playerHand) {
-        Card card = playerHand.pop();
+    CardValue playSingleCard(Deque<CardValue> deck, Deque<CardValue> playerHand) {
+        CardValue card = playerHand.pop();
         deck.push(card);
         return card;
     }
 
-    Boolean playCards(Deque<Card> deck, Deque<Card> playerHand, Integer cardsToPlay) {
+    Boolean playCards(Deque<CardValue> deck, Deque<CardValue> playerHand, Integer cardsToPlay) {
         logger.info(String.format("Needs to play %s cards", cardsToPlay));
 
         for (int i = 0; i < cardsToPlay; i++) {
@@ -132,10 +130,10 @@ public class GamePlay {
                 logger.info("Out of cards");
                 return false;
             }
-            Card card = playSingleCard(deck, playerHand);
+            CardValue card = playSingleCard(deck, playerHand);
             logger.info(String.format("Plays card %s", card));
 
-            if (!card.getValue().equals(CardValue.NON_FACE)) {
+            if (!card.equals(CardValue.NON_FACE)) {
                 return true;
             }
         }

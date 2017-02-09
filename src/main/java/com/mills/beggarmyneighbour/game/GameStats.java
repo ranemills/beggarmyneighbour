@@ -1,6 +1,6 @@
 package com.mills.beggarmyneighbour.game;
 
-import com.mills.beggarmyneighbour.models.Card;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -11,7 +11,7 @@ public class GameStats {
     private final int tricks;
     private final int cards;
     private final Player winner;
-    private List<Card> initialDeck;
+    private List<CardValue> initialDeck;
 
     public GameStats(int tricks, int cards, Player winner) {
         this.tricks = tricks;
@@ -19,7 +19,7 @@ public class GameStats {
         this.winner = winner;
     }
 
-    public void setInitialDeck(List<Card> initialDeck)
+    public void setInitialDeck(List<CardValue> initialDeck)
     {
         this.initialDeck = initialDeck;
     }

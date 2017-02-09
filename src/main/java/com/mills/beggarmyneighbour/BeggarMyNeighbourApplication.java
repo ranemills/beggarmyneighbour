@@ -2,7 +2,7 @@ package com.mills.beggarmyneighbour;
 
 import com.mills.beggarmyneighbour.game.GamePlay;
 import com.mills.beggarmyneighbour.game.GameStats;
-import com.mills.beggarmyneighbour.models.Card;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.utils.CardOperations;
 import org.slf4j.Logger;
@@ -22,8 +22,8 @@ public class BeggarMyNeighbourApplication {
 
         for(int i=0; i<10; i++)
         {
-            List<Card> deck = CardOperations.getDeck();
-            Map<Player, Deque<Card>> playerHands = CardOperations.splitCards(deck);
+            List<CardValue> deck = CardOperations.getDeck();
+            Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
 
             GameStats gameStats = GamePlay.playGame(playerHands);
             gameStats.setInitialDeck(deck);
