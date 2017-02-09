@@ -1,8 +1,8 @@
 package com.mills.beggarmyneighbour.game;
 
 import com.mills.beggarmyneighbour.models.Card;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
-import com.mills.beggarmyneighbour.models.Suit;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -25,8 +25,8 @@ class GamePlayTest {
 
         Deque<Card> deck = new ArrayDeque<>();
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.HEART, 13));
-        hand.push(new Card(Suit.HEART, 8));
+        hand.push(new Card(CardValue.KING));
+        hand.push(new Card(CardValue.NON_FACE));
 
         Boolean result = gamePlaySpy.playCards(deck, hand, 4);
 
@@ -40,10 +40,10 @@ class GamePlayTest {
 
         Deque<Card> deck = new ArrayDeque<>();
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.HEART, 2));
-        hand.push(new Card(Suit.HEART, 3));
-        hand.push(new Card(Suit.HEART, 4));
-        hand.push(new Card(Suit.HEART, 5));
+        hand.push(new Card(CardValue.NON_FACE));
+        hand.push(new Card(CardValue.NON_FACE));
+        hand.push(new Card(CardValue.NON_FACE));
+        hand.push(new Card(CardValue.NON_FACE));
 
         Boolean result = gamePlaySpy.playCards(deck, hand, 4);
 
@@ -57,7 +57,7 @@ class GamePlayTest {
 
         Deque<Card> deck = new ArrayDeque<>();
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.HEART, 2));
+        hand.push(new Card(CardValue.NON_FACE));
 
         Boolean result = gamePlaySpy.playCards(deck, hand, 2);
 
@@ -71,7 +71,7 @@ class GamePlayTest {
         GamePlay gamePlay = new GamePlay();
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.HEART, 2));
+        deck.push(new Card(CardValue.NON_FACE));
 
         int result = gamePlay.computeCardsToPlay(deck);
 
@@ -84,7 +84,7 @@ class GamePlayTest {
         GamePlay gamePlay = new GamePlay();
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.HEART, 12));
+        deck.push(new Card(CardValue.QUEEN));
 
         int result = gamePlay.computeCardsToPlay(deck);
 
@@ -109,16 +109,16 @@ class GamePlayTest {
         GamePlay gamePlay = new GamePlay();
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.CLUB, 2));
-        deck.push(new Card(Suit.CLUB, 3));
+        deck.push(new Card(CardValue.JACK));
+        deck.push(new Card(CardValue.NON_FACE));
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.CLUB, 5));
+        hand.push(new Card(CardValue.NON_FACE));
 
         gamePlay.pickUpDeck(deck, hand);
 
-        assertEquals(hand.pop(), new Card(Suit.CLUB, 5));
-        assertEquals(hand.pop(), new Card(Suit.CLUB, 2));
-        assertEquals(hand.pop(), new Card(Suit.CLUB, 3));
+        assertEquals(hand.pop(), new Card(CardValue.NON_FACE));
+        assertEquals(hand.pop(), new Card(CardValue.JACK));
+        assertEquals(hand.pop(), new Card(CardValue.NON_FACE));
     }
 
     @Test
@@ -128,9 +128,9 @@ class GamePlayTest {
         gamePlay.setPenaltyMode(true);
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.CLUB, 2));
+        deck.push(new Card(CardValue.NON_FACE));
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.CLUB, 5));
+        hand.push(new Card(CardValue.NON_FACE));
 
         boolean penaltyMode = gamePlay.dealWithPenaltyMode(deck, hand);
 
@@ -145,9 +145,9 @@ class GamePlayTest {
         gamePlay.setPenaltyMode(true);
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.CLUB, 13));
+        deck.push(new Card(CardValue.KING));
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.CLUB, 5));
+        hand.push(new Card(CardValue.NON_FACE));
 
         boolean penaltyMode = gamePlay.dealWithPenaltyMode(deck, hand);
 
@@ -162,9 +162,9 @@ class GamePlayTest {
         gamePlay.setPenaltyMode(false);
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.CLUB, 13));
+        deck.push(new Card(CardValue.KING));
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.CLUB, 5));
+        hand.push(new Card(CardValue.NON_FACE));
 
         boolean penaltyMode = gamePlay.dealWithPenaltyMode(deck, hand);
 
@@ -179,9 +179,9 @@ class GamePlayTest {
         gamePlay.setPenaltyMode(false);
 
         Deque<Card> deck = new ArrayDeque<>();
-        deck.push(new Card(Suit.CLUB, 3));
+        deck.push(new Card(CardValue.NON_FACE));
         Deque<Card> hand = new ArrayDeque<>();
-        hand.push(new Card(Suit.CLUB, 5));
+        hand.push(new Card(CardValue.NON_FACE));
 
         boolean penaltyMode = gamePlay.dealWithPenaltyMode(deck, hand);
 
@@ -194,8 +194,8 @@ class GamePlayTest {
     {
         Player player = Player.PLAYER_ONE;
         Deque<Card> playerHand = new ArrayDeque<>();
-        playerHand.push(new Card(Suit.CLUB, 2));
-        playerHand.push(new Card(Suit.CLUB, 3));
+        playerHand.push(new Card(CardValue.NON_FACE));
+        playerHand.push(new Card(CardValue.NON_FACE));
 
         Map<Player, Deque<Card>> playerHands = new HashMap<>();
         playerHands.put(player, playerHand);
@@ -207,8 +207,8 @@ class GamePlayTest {
         gamePlay.playTurn(player, deck);
 
         assertEquals(deck.size(), 1);
-        assertEquals(deck.peek(), new Card(Suit.CLUB, 3));
-        assertEquals(playerHand.peek(), new Card(Suit.CLUB, 2));
+        assertEquals(deck.peek(), new Card(CardValue.NON_FACE));
+        assertEquals(playerHand.peek(), new Card(CardValue.NON_FACE));
     }
 
 }

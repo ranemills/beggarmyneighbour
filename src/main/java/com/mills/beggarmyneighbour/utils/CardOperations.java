@@ -2,6 +2,7 @@ package com.mills.beggarmyneighbour.utils;
 
 import com.google.common.collect.Lists;
 import com.mills.beggarmyneighbour.models.Card;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.models.Suit;
 
@@ -18,9 +19,14 @@ public class CardOperations {
     public static List<Card> getDeck()
     {
         List<Card> deck = new ArrayList<>();
+
         for (Suit suit : Suit.values()) {
-            for (int value = 1; value <= 13; value++) {
-                deck.add(new Card(suit, value));
+            for (int value = 1; value <= 9; value++) {
+                deck.add(new Card(CardValue.NON_FACE));
+            }
+            for(CardValue cardValue : CardValue.values())
+            {
+                deck.add(new Card(cardValue));
             }
         }
         Collections.shuffle(deck);

@@ -3,6 +3,7 @@ package com.mills.beggarmyneighbour.game;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.mills.beggarmyneighbour.models.Card;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class GamePlay {
     }
 
     boolean dealWithPenaltyMode(Deque<Card> deck, Deque<Card> hand) {
-        boolean topCardIsPenalty = PENALTIES.keySet().contains(deck.peek().getValue());
+        boolean topCardIsPenalty = !deck.peek().getValue().equals(CardValue.NON_FACE);
 
         if (!topCardIsPenalty && getPenaltyMode()) {
             pickUpDeck(deck, hand);
@@ -105,11 +106,7 @@ public class GamePlay {
             return 1;
         } else {
             Card topCard = deck.peek();
-            Integer cardsToPlay = PENALTIES.get(topCard.getValue());
-            if (cardsToPlay == null) {
-                cardsToPlay = 1;
-            }
-            return cardsToPlay;
+            return topCard.getValue().getPenalty();
         }
     }
 
@@ -138,7 +135,7 @@ public class GamePlay {
             Card card = playSingleCard(deck, playerHand);
             logger.info(String.format("Plays card %s", card));
 
-            if (PENALTIES.keySet().contains(card.getValue())) {
+            if (!card.getValue().equals(CardValue.NON_FACE)) {
                 return true;
             }
         }
