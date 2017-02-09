@@ -22,6 +22,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -29,10 +30,9 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
     private static final Integer INITIAL_DECKS = 100;
-    private static final Integer ITERATIONS = 50000;
-
+    private static final Integer ITERATIONS = 500;
+    Random random = new Random();
     private Set<List<CardValue>> processedDecks = new HashSet<>();
-
     @Autowired
     private GameStatsRepository gameStatsRepository;
 
@@ -51,14 +51,18 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
      */
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
-        gameStatsRepository.deleteAll();
-
-        Set<List<CardValue>> decks = getInitialDecks();
-
         for (int i = 0; i < ITERATIONS; i++) {
-            runGamesForDecks(decks);
 
-            Pageable pageRequest = new PageRequest(0, 10, Sort.Direction.DESC, "tricks");
+            int page = 1;
+            int pageRandom = random.nextInt(5);
+            if (pageRandom == 0) {
+                page = 2;
+            }
+            if (pageRandom == 1) {
+                page = 3;
+            }
+
+            Pageable pageRequest = new PageRequest(page, 10, Sort.Direction.DESC, "tricks");
             Page<GameStats> response = gameStatsRepository.findAll(pageRequest);
 
             Set<List<CardValue>> winningDecks = new HashSet<>();
@@ -67,19 +71,19 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                 winningDecks.add(stats.getInitialDeck());
             }
 
-            decks = mergeDecks(winningDecks);
+            Set<List<CardValue>> decks = mergeDecks(winningDecks);
 
             if (decks.isEmpty()) {
                 decks = getInitialDecks();
                 processedDecks.addAll(decks);
             }
+
+            runGamesForDecks(decks);
         }
 
         for (GameStats stats : gameStatsRepository.findAll(new PageRequest(0, 1, Sort.Direction.DESC, "tricks"))) {
             logger.info("Best deck was {} with {} tricks", stats.getDeckRepresentation(), stats.getTricks());
         }
-
-
     }
 
     private Set<List<CardValue>> mergeDecks(Set<List<CardValue>> decks)
@@ -87,7 +91,9 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         Set<List<CardValue>> newDecks = new HashSet<>();
         for (List<CardValue> deck1 : decks) {
             if (Math.random() > 0.9) {
-                deck1.add(deck1.remove(0));
+                int i = deck1.indexOf(CardValue.KING);
+                int j = random.nextInt(52);
+                deck1.add(j, deck1.remove(i));
                 logger.info("Mutation");
             }
             for (List<CardValue> deck2 : decks) {
@@ -97,7 +103,11 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                 List<CardValue> deck1Clone = new ArrayList<>(deck1);
                 List<CardValue> deck2Clone = new ArrayList<>(deck2);
 
-                int i = (int) (Math.random() * 52);
+                int i = random.nextInt(52);
+                while (deck1Clone.get(i) == CardValue.NON_FACE &&
+                       deck2Clone.get(i) == CardValue.NON_FACE) {
+                    i = random.nextInt(52);
+                }
 
                 crossOverLists(deck1Clone, deck2Clone, i);
 

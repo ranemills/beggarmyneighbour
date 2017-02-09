@@ -3,6 +3,7 @@ package com.mills.beggarmyneighbour.game;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -22,6 +23,7 @@ public class GameStats {
     private final Player winner;
     @Field
     private List<CardValue> initialDeck;
+    @Id
     @Field("deck_representation")
     private String deckRepresentation;
 
