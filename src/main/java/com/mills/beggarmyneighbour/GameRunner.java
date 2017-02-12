@@ -1,11 +1,17 @@
 package com.mills.beggarmyneighbour;
 
+import com.mills.beggarmyneighbour.ga.CrossOverMergeStrategy;
+import com.mills.beggarmyneighbour.ga.MergeStrategy;
+import com.mills.beggarmyneighbour.ga.MoveKingMutationStrategy;
+import com.mills.beggarmyneighbour.ga.MutationStrategy;
 import com.mills.beggarmyneighbour.game.GamePlay;
 import com.mills.beggarmyneighbour.game.GameStats;
 import com.mills.beggarmyneighbour.models.CardValue;
+import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.repositories.GameStatsRepository;
 import com.mills.beggarmyneighbour.utils.CardOperations;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +34,28 @@ import java.util.Set;
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
+    // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
     private static final Integer INITIAL_DECKS = 100;
     private static final Integer ITERATIONS = 500;
-    Random random = new Random();
-    private Set<List<CardValue>> processedDecks = new HashSet<>();
-    @Autowired
-    private GameStatsRepository gameStatsRepository;
+    private static final Random RANDOM = new Random();
 
-    private static GameStats generateAndPlayGame(List<CardValue> deck)
+    // Store the decks we've dealt with
+    private Set<Deck> processedDecks = new HashSet<>();
+
+    // Strategies
+    private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
+    private MutationStrategy mutationStrategy = new MoveKingMutationStrategy();
+
+    // Fields to autowire
+    private final GameStatsRepository gameStatsRepository;
+
+    @Autowired
+    public GameRunner(GameStatsRepository gameStatsRepository) {
+        this.gameStatsRepository = gameStatsRepository;
+    }
+
+    private static GameStats generateAndPlayGame(Deck deck)
     {
         Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
 
@@ -54,7 +73,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         for (int i = 0; i < ITERATIONS; i++) {
 
             int page = 1;
-            int pageRandom = random.nextInt(5);
+            int pageRandom = RANDOM.nextInt(5);
             if (pageRandom == 0) {
                 page = 2;
             }
@@ -65,13 +84,13 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
             Pageable pageRequest = new PageRequest(page, 10, Sort.Direction.DESC, "tricks");
             Page<GameStats> response = gameStatsRepository.findAll(pageRequest);
 
-            Set<List<CardValue>> winningDecks = new HashSet<>();
+            Set<Deck> winningDecks = new HashSet<>();
 
             for (GameStats stats : response) {
                 winningDecks.add(stats.getInitialDeck());
             }
 
-            Set<List<CardValue>> decks = mergeDecks(winningDecks);
+            Set<Deck> decks = mergeDecks(winningDecks);
 
             if (decks.isEmpty()) {
                 decks = getInitialDecks();
@@ -86,50 +105,28 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         }
     }
 
-    private Set<List<CardValue>> mergeDecks(Set<List<CardValue>> decks)
+    private Set<Deck> mergeDecks(Set<Deck> decks)
     {
-        Set<List<CardValue>> newDecks = new HashSet<>();
-        for (List<CardValue> deck1 : decks) {
+        Set<Deck> newDecks = new HashSet<>();
+        for (Deck deck1 : decks) {
             if (Math.random() > 0.9) {
-                int i = deck1.indexOf(CardValue.KING);
-                int j = random.nextInt(52);
-                deck1.add(j, deck1.remove(i));
+                mutationStrategy.mutateDeck(deck1);
                 logger.info("Mutation");
             }
-            for (List<CardValue> deck2 : decks) {
-                if (deck1.equals(deck2)) {
-                    continue;
-                }
-                List<CardValue> deck1Clone = new ArrayList<>(deck1);
-                List<CardValue> deck2Clone = new ArrayList<>(deck2);
+            for (Deck deck2 : decks) {
+                Pair<Deck, Deck> mergedDecks = mergeStrategy.mergeDecks(deck1, deck2);
 
-                int i = random.nextInt(52);
-                while (deck1Clone.get(i) == CardValue.NON_FACE &&
-                       deck2Clone.get(i) == CardValue.NON_FACE) {
-                    i = random.nextInt(52);
+                if (!processedDecks.contains(mergedDecks.getLeft()) && !newDecks.contains(mergedDecks.getLeft())) {
+                    newDecks.add(mergedDecks.getLeft());
                 }
-
-                crossOverLists(deck1Clone, deck2Clone, i);
-
-                while (!CardOperations.isValidDeck(deck1Clone)) {
-                    i++;
-                    if (i > 51) {
-                        i = 0;
-                    }
-                    crossOverLists(deck1Clone, deck2Clone, i);
-                }
-
-                if (!processedDecks.contains(deck1Clone) && !newDecks.contains(deck1Clone)) {
-                    newDecks.add(deck1Clone);
-                }
-                if (!processedDecks.contains(deck2Clone) && !newDecks.contains(deck2Clone)) {
-                    newDecks.add(deck2Clone);
+                if (!processedDecks.contains(mergedDecks.getRight()) && !newDecks.contains(mergedDecks.getRight())) {
+                    newDecks.add(mergedDecks.getRight());
                 }
             }
         }
 
-        for (List<CardValue> deck : newDecks) {
-            logger.info("Generated new deck {}", CardOperations.deckToString(deck));
+        for (Deck deck : newDecks) {
+            logger.info("Generated new deck {}", deck);
 
         }
 
@@ -137,29 +134,20 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         return newDecks;
     }
 
-    private void crossOverLists(List<CardValue> deck1, List<CardValue> deck2, int index)
+    private Set<Deck> getInitialDecks()
     {
-        CardValue deck1Value = deck1.remove(index);
-        CardValue deck2Value = deck2.remove(index);
-
-        deck1.add(index, deck2Value);
-        deck2.add(index, deck1Value);
-    }
-
-    private Set<List<CardValue>> getInitialDecks()
-    {
-        Set<List<CardValue>> decks = new HashSet<>();
+        Set<Deck> decks = new HashSet<>();
         for (int i = 0; i < INITIAL_DECKS; i++) {
             decks.add(CardOperations.getShuffledDeck());
         }
         return decks;
     }
 
-    private void runGamesForDecks(Set<List<CardValue>> decks)
+    private void runGamesForDecks(Set<Deck> decks)
     {
         List<GameStats> results = new ArrayList<>();
 
-        for (List<CardValue> deck : decks) {
+        for (Deck deck : decks) {
             results.add(generateAndPlayGame(deck));
         }
 

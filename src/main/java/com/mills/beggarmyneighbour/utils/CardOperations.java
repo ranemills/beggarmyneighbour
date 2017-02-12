@@ -3,6 +3,7 @@ package com.mills.beggarmyneighbour.utils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mills.beggarmyneighbour.models.CardValue;
+import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
 
 import java.util.ArrayDeque;
@@ -16,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CardOperations {
-    public static List<CardValue> getShuffledDeck()
+    public static Deck getShuffledDeck()
     {
-        List<CardValue> deck = new ArrayList<>();
+        Deck deck = new Deck();
 
         for(int i=0; i<36; i++)
         {
@@ -35,39 +36,17 @@ public class CardOperations {
         return deck;
     }
 
-    public static Map<Player, Deque<CardValue>> splitCards(List<CardValue> deck)
+    public static Map<Player, Deque<CardValue>> splitCards(Deck deck)
     {
         int numberPlayers = Player.values().length;
         List<Player> players = Arrays.asList(Player.values());
-        List<List<CardValue>> partitions = Lists.partition(deck, deck.size()/numberPlayers);
+        int partitionSize = deck.size()/numberPlayers;
 
         Map<Player, Deque<CardValue>> playerHands = new HashMap<>();
         for (int i = 0; i < numberPlayers; i++) {
-            playerHands.put(players.get(i), new ArrayDeque<>(partitions.get(i)));
+            playerHands.put(players.get(i), new ArrayDeque<>(deck.subList(i, i+partitionSize)));
         }
 
         return playerHands;
-    }
-
-    public static Boolean isValidDeck(List<CardValue> inDeck)
-    {
-        List<CardValue> deck = new ArrayList<>(inDeck);
-        for(CardValue cardValue : EnumSet.allOf(CardValue.class))
-        {
-            for(int i=0; i<cardValue.getRequiredInDeck(); i++)
-            {
-                if(!deck.remove(cardValue)) { return false; }
-            }
-        }
-        return true;
-    }
-
-    public static String deckToString(List<CardValue> deck)
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (CardValue value : deck) {
-            stringBuilder.append(value.getAsciiChar());
-        }
-        return stringBuilder.toString();
     }
 }

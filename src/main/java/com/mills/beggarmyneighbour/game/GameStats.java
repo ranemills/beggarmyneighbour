@@ -1,14 +1,13 @@
 package com.mills.beggarmyneighbour.game;
 
 import com.mills.beggarmyneighbour.models.CardValue;
+import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.util.List;
 
 @Document
 public class GameStats {
@@ -22,9 +21,8 @@ public class GameStats {
     @Field
     private final Player winner;
     @Field
-    private List<CardValue> initialDeck;
+    private Deck initialDeck;
     @Id
-    @Field("deck_representation")
     private String deckRepresentation;
 
     public GameStats(int tricks, int cards, Player winner) {
@@ -48,7 +46,7 @@ public class GameStats {
                    .append("tricks", tricks)
                    .append("cards", cards)
                    .append("winner", winner)
-                   .append("initialDeck", initialDeckToString())
+                   .append("initialDeck", initialDeck.toString())
                    .toString();
     }
 
@@ -64,11 +62,11 @@ public class GameStats {
         return winner;
     }
 
-    public List<CardValue> getInitialDeck() {
+    public Deck getInitialDeck() {
         return initialDeck;
     }
 
-    public void setInitialDeck(List<CardValue> initialDeck)
+    public void setInitialDeck(Deck initialDeck)
     {
         this.initialDeck = initialDeck;
         this.deckRepresentation = initialDeckToString();
