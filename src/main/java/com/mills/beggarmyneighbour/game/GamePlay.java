@@ -1,40 +1,33 @@
 package com.mills.beggarmyneighbour.game;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import java.util.*;
+import static com.mills.beggarmyneighbour.GameRunner.PLAYER_VALUES;
 
 public class GamePlay {
-    private static final Logger logger = LoggerFactory.getLogger(GamePlay.class);
-
-
-    private static final Map<Integer, Integer> PENALTIES = ImmutableMap.<Integer, Integer>builder().put(1, 4)
-            .put(11, 1)
-            .put(12, 2)
-            .put(13, 3)
-            .build();
+    private Iterator<Player> playerIterator = Iterables.cycle(PLAYER_VALUES).iterator();
 
     private Boolean isPenalty = false;
-    private Map<Player, Deque<CardValue>> playerHands;
 
+    private Map<Player, Deque<CardValue>> playerHands;
     private int numberTricks = 0;
+
     private int numberCards = 0;
 
-    private Iterator<Player> playerIterator;
-
     GamePlay() {
-        this(new HashMap<Player, Deque<CardValue>>());
+        this(new HashMap<>());
     }
 
-    public GamePlay(Map<Player, Deque<CardValue>> playerHands) {
+    GamePlay(Map<Player, Deque<CardValue>> playerHands) {
         this.playerHands = playerHands;
-        this.playerIterator = Iterables.cycle(Player.values()).iterator();
     }
 
     public static GameStats playGame(Map<Player, Deque<CardValue>> playerHands) {
@@ -50,12 +43,7 @@ public class GamePlay {
 
         int cardsToPlay = computeCardsToPlay(deck);
 
-        if (!playCards(deck, hand, cardsToPlay)) {
-            logger.trace(String.format("End of game. Player %s lost.", player));
-            return false;
-        }
-
-        return true;
+        return playCards(deck, hand, cardsToPlay);
     }
 
     boolean dealWithPenaltyMode(Deque<CardValue> deck, Deque<CardValue> hand) {
@@ -79,10 +67,9 @@ public class GamePlay {
         numberTricks++;
     }
 
-    public GameStats playGame() {
+    private GameStats playGame() {
         Deque<CardValue> deck = new ArrayDeque<>();
-        for (Player player : Iterables.cycle(Player.values())) {
-            logger.trace(String.format("Turn of %s", player));
+        for (Player player : Iterables.cycle(PLAYER_VALUES)) {
             if (!playTurn(player, deck)) {
                 break;
             }
@@ -92,7 +79,7 @@ public class GamePlay {
         return new GameStats(numberTricks, numberCards, winner);
     }
 
-    public Boolean getPenaltyMode() {
+    private Boolean getPenaltyMode() {
         return isPenalty;
     }
 

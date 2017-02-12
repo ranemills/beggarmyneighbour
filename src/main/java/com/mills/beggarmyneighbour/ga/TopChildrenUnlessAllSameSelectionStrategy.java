@@ -18,26 +18,22 @@ public class TopChildrenUnlessAllSameSelectionStrategy
 
     @Override
     public List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results) {
-
-
         List<GameStats> minimisedResults = results.stream()
                                                   .sorted(Comparator.comparing(GameStats::getTricks).reversed())
                                                   .limit(INITIAL_DECKS)
-                                                  .peek(result -> LOGGER.info("{}: {}",
-                                                                              result.getDeckRepresentation(),
-                                                                              result.getTricks()))
                                                   .collect(Collectors.toList());
 
+        LOGGER.info("Top was: {}: {}", minimisedResults.get(0).getDeckRepresentation(), minimisedResults.get(0).getTricks());
+        LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size()-1).getDeckRepresentation(), minimisedResults.get(minimisedResults.size()-1).getTricks());
+
         List<SpecificDeckRepresentation> decks;
-        if (minimisedResults.stream()
-                            .map(GameStats::getTricks)
-                            .distinct()
-                            .collect(Collectors.toList()).size() <= 3)
+        if (minimisedResults.get(0).getTricks() - minimisedResults.get(minimisedResults.size()-1).getTricks() < 20)
         {
-            decks = minimisedResults.stream().limit(INITIAL_DECKS / 2)
+            decks = minimisedResults.stream()
+                                    .limit(INITIAL_DECKS / 2)
                                     .map(GameStats::getSpecificDeckRepresentation)
                                     .collect(Collectors.toList());
-            for (int j = 0; j < INITIAL_DECKS / 2; j++) {
+            while(decks.size() < INITIAL_DECKS) {
                 decks.add(CardOperations.getShuffledDeck());
             }
         } else {

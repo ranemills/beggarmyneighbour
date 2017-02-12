@@ -1,12 +1,15 @@
 package com.mills.beggarmyneighbour;
 
+import com.google.common.collect.Sets;
 import com.mills.beggarmyneighbour.ga.CrossOverMergeStrategy;
 import com.mills.beggarmyneighbour.ga.MergeStrategy;
 import com.mills.beggarmyneighbour.ga.MutationStrategy;
+import com.mills.beggarmyneighbour.ga.RandomDeckMutationStrategy;
 import com.mills.beggarmyneighbour.ga.SelectionStrategy;
 import com.mills.beggarmyneighbour.ga.SwapPenaltyCardsMutationStrategy;
 import com.mills.beggarmyneighbour.ga.TopChildrenUnlessAllSameSelectionStrategy;
 import com.mills.beggarmyneighbour.game.GamePlay;
+import com.mills.beggarmyneighbour.game.GamePlayThread;
 import com.mills.beggarmyneighbour.game.GameStats;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Deck;
@@ -34,32 +37,21 @@ import java.util.Set;
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
+    public static final Player[] PLAYER_VALUES = Player.values();
+
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
     private static final Integer INITIAL_DECKS = 100;
     private static final Integer ITERATIONS = 5000;
-    // Fields to autowire
-    private final GameStatsRepository gameStatsRepository;
+
     // Store the decks we've dealt with
     private Set<SpecificDeckRepresentation> processedDecks = new HashSet<>();
+
     // Strategies
     private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
-    private MutationStrategy mutationStrategy = new SwapPenaltyCardsMutationStrategy();
+    private MutationStrategy mutationStrategy1 = new SwapPenaltyCardsMutationStrategy();
+    private MutationStrategy mutationStrategy2 = new RandomDeckMutationStrategy();
     private SelectionStrategy selectionStrategy = new TopChildrenUnlessAllSameSelectionStrategy();
-
-    @Autowired
-    public GameRunner(GameStatsRepository gameStatsRepository) {
-        this.gameStatsRepository = gameStatsRepository;
-    }
-
-    private static GameStats generateAndPlayGame(Deck deck)
-    {
-        Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
-
-        GameStats gameStats = GamePlay.playGame(playerHands);
-        gameStats.setSpecificDeckRepresentation(SpecificDeckRepresentation.fromDeck(deck));
-        return gameStats;
-    }
 
     /**
      * This event is executed as late as conceivably possible to indicate that
@@ -81,11 +73,6 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
             logger.info("Number of results {}", results.size());
 
             decks = mergeDecks(selectionStrategy.selectFromResults(results));
-
-        }
-
-        for (GameStats stats : gameStatsRepository.findAll(new PageRequest(0, 1, Sort.Direction.DESC, "tricks"))) {
-            logger.info("Best deck was {} with {} tricks", stats.getDeckRepresentation(), stats.getTricks());
         }
     }
 
@@ -94,26 +81,34 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         Set<SpecificDeckRepresentation> newDecks = new HashSet<>();
         for (SpecificDeckRepresentation deck1 : decks) {
             if (Math.random() > 0.9) {
-                deck1 = mutationStrategy.mutateDeck(deck1);
-                logger.debug("Mutation");
+                deck1 = mutationStrategy1.mutateDeck(deck1);
+            }
+            else if (Math.random() > 0.9) {
+                deck1 = mutationStrategy2.mutateDeck(deck1);
             }
             for (SpecificDeckRepresentation deck2 : decks) {
+                if(deck1 == deck2)
+                {
+                    continue;
+                }
+
                 Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergedSpecificDeckRepresentations =
                     mergeStrategy.mergeDecks(deck1, deck2);
 
-                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getLeft())) {
+//                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getLeft())) {
                     newDecks.add(mergedSpecificDeckRepresentations.getLeft());
-                }
-                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getRight())) {
+//                }
+//                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getRight())) {
                     newDecks.add(mergedSpecificDeckRepresentations.getRight());
-                }
+//                }
             }
         }
 
-        for (SpecificDeckRepresentation deck : newDecks) {
-            logger.debug("Generated new deck {}", deck);
+//        for (SpecificDeckRepresentation deck : newDecks) {
+//            logger.debug("Generated new deck {}", deck);
+//        }
 
-        }
+        newDecks = Sets.difference(newDecks, processedDecks);
 
         return new ArrayList<>(newDecks);
     }
@@ -131,11 +126,36 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
     {
         List<GameStats> results = new ArrayList<>();
 
+        List<Thread> threads = new ArrayList<>();
+        List<GamePlayThread> gamePlayThreads = new ArrayList<>();
+
         for (SpecificDeckRepresentation deck : decks) {
-            results.add(generateAndPlayGame(deck.toDeck()));
+            GamePlayThread gamePlayThread = new GamePlayThread(deck.toDeck());
+            Thread thread = new Thread(gamePlayThread);
+
+            thread.start();
+
+            threads.add(thread);
+            gamePlayThreads.add(gamePlayThread);
+
+//            results.add(generateAndPlayGame(deck.toDeck()));
         }
 
-        gameStatsRepository.save(results);
+        logger.info("Spun up {} threads", threads.size());
+
+        for(int i=0; i<threads.size(); i++)
+        {
+            try {
+                threads.get(i).join();
+                results.add(gamePlayThreads.get(i).getGameStats());
+            }
+            catch (InterruptedException e)
+            {
+                logger.warn("Thread {} was interrupted. Deck was {}", i, decks.get(i));
+            }
+        }
+
+//        gameStatsRepository.save(results);
 
         return results;
     }

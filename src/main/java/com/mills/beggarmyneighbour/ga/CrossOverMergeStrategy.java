@@ -47,10 +47,6 @@ public class CrossOverMergeStrategy implements MergeStrategy {
     public Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergeDecks(SpecificDeckRepresentation deck1,
                                                                                    SpecificDeckRepresentation deck2)
     {
-        if (deck1.equals(deck2)) {
-            return Pair.of(deck1, deck2);
-        }
-
         List<Integer> deck1Rep = deck1.toList();
         List<Integer> deck2Rep = deck2.toList();
 
@@ -70,17 +66,9 @@ public class CrossOverMergeStrategy implements MergeStrategy {
             isValid = (new HashSet<>(deck1Rep).size() == 16 && new HashSet<>(deck2Rep).size() == 16);
         }
 
-//        LOGGER.info("Received:");
-//        LOGGER.info(deck1.toString());
-//        LOGGER.info(deck2.toString());
-
         SpecificDeckRepresentation newDeck1 = SpecificDeckRepresentation.fromOrderedList(deck1Rep);
         SpecificDeckRepresentation newDeck2 = SpecificDeckRepresentation.fromOrderedList(deck2Rep);
 
-
-//        LOGGER.info("Produced");
-//        LOGGER.info(newDeck1.toString());
-//        LOGGER.info(newDeck2.toString());
 
         return Pair.of(newDeck1, newDeck2);
     }
