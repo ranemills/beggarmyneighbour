@@ -32,7 +32,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer INITIAL_DECKS = 100;
+    private static final Integer INITIAL_DECKS = 50;
     private static final Integer ITERATIONS = 5000;
 
     // Store the decks we've dealt with

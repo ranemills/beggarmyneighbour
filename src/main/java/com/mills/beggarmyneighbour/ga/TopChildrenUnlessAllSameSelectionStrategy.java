@@ -14,7 +14,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopChildrenUnlessAllSameSelectionStrategy.class);
 
-    private static final int INITIAL_DECKS = 100;
+    private static final int INITIAL_DECKS = 50;
 
     @Override
     public List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results) {

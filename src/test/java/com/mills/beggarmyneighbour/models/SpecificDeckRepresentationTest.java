@@ -74,4 +74,13 @@ class SpecificDeckRepresentationTest {
         assertEquals(generateOrderedDeck(), SpecificDeckRepresentation.fromOrderedList(input).toDeck());
     }
 
+    @Test
+    public void equality()
+    {
+        SpecificDeckRepresentation left = SpecificDeckRepresentation.fromDeck(generateOrderedDeck());
+        SpecificDeckRepresentation right = SpecificDeckRepresentation.fromDeck(generateOrderedDeck());
+
+        assertEquals(left, right);
+    }
+
 }
