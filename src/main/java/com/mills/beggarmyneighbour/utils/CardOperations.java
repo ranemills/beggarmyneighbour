@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
+import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -17,23 +18,28 @@ import java.util.List;
 import java.util.Map;
 
 public class CardOperations {
-    public static Deck getShuffledDeck()
+//    public static Deck getShuffledDeck()
+//    {
+//        Deck deck = new Deck();
+//
+//        for(int i=0; i<36; i++)
+//        {
+//            deck.add(CardValue.NON_FACE);
+//        }
+//
+//        for (int i=0; i<4; i++) {
+//            deck.add(CardValue.ACE);
+//            deck.add(CardValue.KING);
+//            deck.add(CardValue.QUEEN);
+//            deck.add(CardValue.JACK);
+//        }
+//        Collections.shuffle(deck);
+//        return deck;
+//    }
+
+    public static SpecificDeckRepresentation getShuffledDeck()
     {
-        Deck deck = new Deck();
-
-        for(int i=0; i<36; i++)
-        {
-            deck.add(CardValue.NON_FACE);
-        }
-
-        for (int i=0; i<4; i++) {
-            deck.add(CardValue.ACE);
-            deck.add(CardValue.KING);
-            deck.add(CardValue.QUEEN);
-            deck.add(CardValue.JACK);
-        }
-        Collections.shuffle(deck);
-        return deck;
+        return SpecificDeckRepresentation.randomDeck();
     }
 
     public static Map<Player, Deque<CardValue>> splitCards(Deck deck)

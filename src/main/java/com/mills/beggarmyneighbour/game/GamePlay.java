@@ -122,22 +122,22 @@ public class GamePlay {
     }
 
     Boolean playCards(Deque<CardValue> deck, Deque<CardValue> playerHand, Integer cardsToPlay) {
-        logger.trace(String.format("Needs to play %s cards", cardsToPlay));
+//        logger.trace(String.format("Needs to play %s cards", cardsToPlay));
 
         for (int i = 0; i < cardsToPlay; i++) {
             numberCards++;
             if (playerHand.isEmpty()) {
-                logger.trace("Out of cards");
+//                logger.trace("Out of cards");
                 return false;
             }
             CardValue card = playSingleCard(deck, playerHand);
-            logger.trace(String.format("Plays card %s", card));
+//            logger.trace(String.format("Plays card %s", card));
 
             if (!card.equals(CardValue.NON_FACE)) {
                 return true;
             }
         }
-        logger.trace("End of turn");
+//        logger.trace("End of turn");
         return true;
     }
 }

@@ -3,8 +3,10 @@ package com.mills.beggarmyneighbour.game;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
+import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -24,11 +26,23 @@ public class GameStats {
     private Deck initialDeck;
     @Id
     private String deckRepresentation;
+    @Transient
+    private SpecificDeckRepresentation specificDeckRepresentation;
 
     public GameStats(int tricks, int cards, Player winner) {
         this.tricks = tricks;
         this.cards = cards;
         this.winner = winner;
+    }
+
+    public SpecificDeckRepresentation getSpecificDeckRepresentation() {
+        return specificDeckRepresentation;
+    }
+
+    public GameStats setSpecificDeckRepresentation(SpecificDeckRepresentation specificDeckRepresentation) {
+        setInitialDeck(specificDeckRepresentation.toDeck());
+        this.specificDeckRepresentation = specificDeckRepresentation;
+        return this;
     }
 
     private String initialDeckToString()

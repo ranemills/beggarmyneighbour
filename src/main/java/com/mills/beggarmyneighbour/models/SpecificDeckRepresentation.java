@@ -1,5 +1,8 @@
 package com.mills.beggarmyneighbour.models;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +39,37 @@ public class SpecificDeckRepresentation {
         kings = new HashSet<>();
         queens = new HashSet<>();
         jacks = new HashSet<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SpecificDeckRepresentation that = (SpecificDeckRepresentation) o;
+
+        return new EqualsBuilder()
+                   .append(getAces(), that.getAces())
+                   .append(getKings(), that.getKings())
+                   .append(getQueens(), that.getQueens())
+                   .append(getJacks(), that.getJacks())
+                   .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                   .append(getAces())
+                   .append(getKings())
+                   .append(getQueens())
+                   .append(getJacks())
+                   .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return toDeck().toString();
     }
 
     public List<Integer> toList()
@@ -118,6 +152,16 @@ public class SpecificDeckRepresentation {
         test.addAll(queens);
         test.addAll(jacks);
         return test.size() == 16;
+    }
+
+    public static SpecificDeckRepresentation randomDeck()
+    {
+        Set<Integer> numbers = new HashSet<>();
+        while(numbers.size() != 16)
+        {
+            numbers.add((int) (Math.random()*52));
+        }
+        return SpecificDeckRepresentation.fromOrderedList(new ArrayList<>(numbers));
     }
 
 }

@@ -3,14 +3,15 @@ package com.mills.beggarmyneighbour;
 import com.mills.beggarmyneighbour.ga.CrossOverMergeStrategy;
 import com.mills.beggarmyneighbour.ga.MergeStrategy;
 import com.mills.beggarmyneighbour.ga.MutationStrategy;
-import com.mills.beggarmyneighbour.ga.RandomDeckMutationStrategy;
 import com.mills.beggarmyneighbour.ga.SelectionStrategy;
+import com.mills.beggarmyneighbour.ga.SwapPenaltyCardsMutationStrategy;
 import com.mills.beggarmyneighbour.ga.TopChildrenUnlessAllSameSelectionStrategy;
 import com.mills.beggarmyneighbour.game.GamePlay;
 import com.mills.beggarmyneighbour.game.GameStats;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
+import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 import com.mills.beggarmyneighbour.repositories.GameStatsRepository;
 import com.mills.beggarmyneighbour.utils.CardOperations;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,13 +25,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
@@ -38,14 +37,14 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
     private static final Integer INITIAL_DECKS = 100;
-    private static final Integer ITERATIONS = 20;
+    private static final Integer ITERATIONS = 5000;
     // Fields to autowire
     private final GameStatsRepository gameStatsRepository;
     // Store the decks we've dealt with
-    private Set<Deck> processedDecks = new HashSet<>();
+    private Set<SpecificDeckRepresentation> processedDecks = new HashSet<>();
     // Strategies
     private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
-    private MutationStrategy mutationStrategy = new RandomDeckMutationStrategy();
+    private MutationStrategy mutationStrategy = new SwapPenaltyCardsMutationStrategy();
     private SelectionStrategy selectionStrategy = new TopChildrenUnlessAllSameSelectionStrategy();
 
     @Autowired
@@ -58,7 +57,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
 
         GameStats gameStats = GamePlay.playGame(playerHands);
-        gameStats.setInitialDeck(deck);
+        gameStats.setSpecificDeckRepresentation(SpecificDeckRepresentation.fromDeck(deck));
         return gameStats;
     }
 
@@ -68,7 +67,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
      */
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
-        List<Deck> decks = new ArrayList<>();
+        List<SpecificDeckRepresentation> decks = new ArrayList<>();
         for (int i = 0; i < ITERATIONS; i++) {
             if (decks.isEmpty()) {
                 decks = getInitialDecks();
@@ -90,27 +89,28 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         }
     }
 
-    private List<Deck> mergeDecks(List<Deck> decks)
+    private List<SpecificDeckRepresentation> mergeDecks(List<SpecificDeckRepresentation> decks)
     {
-        Set<Deck> newDecks = new HashSet<>();
-        for (Deck deck1 : decks) {
+        Set<SpecificDeckRepresentation> newDecks = new HashSet<>();
+        for (SpecificDeckRepresentation deck1 : decks) {
             if (Math.random() > 0.9) {
                 deck1 = mutationStrategy.mutateDeck(deck1);
                 logger.debug("Mutation");
             }
-            for (Deck deck2 : decks) {
-                Pair<Deck, Deck> mergedDecks = mergeStrategy.mergeDecks(deck1, deck2);
+            for (SpecificDeckRepresentation deck2 : decks) {
+                Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergedSpecificDeckRepresentations =
+                    mergeStrategy.mergeDecks(deck1, deck2);
 
-                if (!processedDecks.contains(mergedDecks.getLeft())) {
-                    newDecks.add(mergedDecks.getLeft());
+                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getLeft())) {
+                    newDecks.add(mergedSpecificDeckRepresentations.getLeft());
                 }
-                if (!processedDecks.contains(mergedDecks.getRight())) {
-                    newDecks.add(mergedDecks.getRight());
+                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getRight())) {
+                    newDecks.add(mergedSpecificDeckRepresentations.getRight());
                 }
             }
         }
 
-        for (Deck deck : newDecks) {
+        for (SpecificDeckRepresentation deck : newDecks) {
             logger.debug("Generated new deck {}", deck);
 
         }
@@ -118,21 +118,21 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         return new ArrayList<>(newDecks);
     }
 
-    private List<Deck> getInitialDecks()
+    private List<SpecificDeckRepresentation> getInitialDecks()
     {
-        List<Deck> decks = new ArrayList<>();
+        List<SpecificDeckRepresentation> decks = new ArrayList<>();
         for (int i = 0; i < INITIAL_DECKS; i++) {
             decks.add(CardOperations.getShuffledDeck());
         }
         return decks;
     }
 
-    private List<GameStats> runGamesForDecks(List<Deck> decks)
+    private List<GameStats> runGamesForDecks(List<SpecificDeckRepresentation> decks)
     {
         List<GameStats> results = new ArrayList<>();
 
-        for (Deck deck : decks) {
-            results.add(generateAndPlayGame(deck));
+        for (SpecificDeckRepresentation deck : decks) {
+            results.add(generateAndPlayGame(deck.toDeck()));
         }
 
         gameStatsRepository.save(results);

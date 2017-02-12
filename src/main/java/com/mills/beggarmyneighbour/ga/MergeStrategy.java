@@ -1,10 +1,11 @@
 package com.mills.beggarmyneighbour.ga;
 
-import com.mills.beggarmyneighbour.models.Deck;
+import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 import org.apache.commons.lang3.tuple.Pair;
 
 public interface MergeStrategy {
 
-    Pair<Deck, Deck> mergeDecks(Deck deck1, Deck deck2);
+    Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergeDecks(SpecificDeckRepresentation deck1,
+                                                                            SpecificDeckRepresentation deck2);
 
 }
