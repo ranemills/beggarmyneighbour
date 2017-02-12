@@ -12,21 +12,12 @@ import java.util.Map;
 public class GamePlayThread
     implements Runnable {
 
-    private final Deck deck;
+    private final SpecificDeckRepresentation deck;
     private volatile GameStats gameStats;
 
-    public GamePlayThread(Deck deck)
+    public GamePlayThread(SpecificDeckRepresentation deck)
     {
         this.deck = deck;
-    }
-
-    private static GameStats generateAndPlayGame(Deck deck)
-    {
-        Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
-
-        GameStats gameStats = GamePlay.playGame(playerHands);
-        gameStats.setSpecificDeckRepresentation(SpecificDeckRepresentation.fromDeck(deck));
-        return gameStats;
     }
 
     public GameStats getGameStats() {
@@ -35,9 +26,9 @@ public class GamePlayThread
 
     @Override
     public void run() {
-        Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck);
+        Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck.toDeck());
 
         gameStats = GamePlay.playGame(playerHands);
-        gameStats.setSpecificDeckRepresentation(SpecificDeckRepresentation.fromDeck(deck));
+        gameStats.setSpecificDeckRepresentation(deck);
     }
 }

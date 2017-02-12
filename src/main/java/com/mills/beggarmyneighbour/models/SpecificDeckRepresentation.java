@@ -1,5 +1,6 @@
 package com.mills.beggarmyneighbour.models;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -8,37 +9,89 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.mills.beggarmyneighbour.models.CardValue.*;
+import static com.mills.beggarmyneighbour.models.CardValue.ACE;
+import static com.mills.beggarmyneighbour.models.CardValue.JACK;
+import static com.mills.beggarmyneighbour.models.CardValue.KING;
+import static com.mills.beggarmyneighbour.models.CardValue.NON_FACE;
+import static com.mills.beggarmyneighbour.models.CardValue.QUEEN;
 
 public class SpecificDeckRepresentation {
 
-    private Set<Integer> aces;
-    private Set<Integer> kings;
-    private Set<Integer> queens;
+    private ImmutableList<Integer> aces;
+    private ImmutableList<Integer> kings;
+    private ImmutableList<Integer> queens;
+    private ImmutableList<Integer> jacks;
 
-    public Set<Integer> getAces() {
+    private SpecificDeckRepresentation() {
+    }
+
+    public static SpecificDeckRepresentation fromOrderedList(List<Integer> orderedList)
+    {
+        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
+        deckRepresentation.aces = ImmutableList.<Integer>builder().addAll(orderedList.subList(0, 4)).build();
+        deckRepresentation.kings = ImmutableList.<Integer>builder().addAll(orderedList.subList(4, 8)).build();
+        deckRepresentation.queens = ImmutableList.<Integer>builder().addAll(orderedList.subList(8, 12)).build();
+        deckRepresentation.jacks = ImmutableList.<Integer>builder().addAll(orderedList.subList(8, 12)).build();
+        return deckRepresentation;
+    }
+
+    @Deprecated
+    static SpecificDeckRepresentation fromDeck(Deck deck)
+    {
+        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
+        for (int i = 0; i < deck.size(); i++) {
+            CardValue value = deck.get(i);
+            switch (value) {
+                case ACE:
+                    deckRepresentation.aces.add(i);
+                    break;
+                case KING:
+                    deckRepresentation.kings.add(i);
+                    break;
+                case QUEEN:
+                    deckRepresentation.queens.add(i);
+                    break;
+                case JACK:
+                    deckRepresentation.jacks.add(i);
+                    break;
+            }
+        }
+        return deckRepresentation;
+    }
+
+    public static SpecificDeckRepresentation randomDeck()
+    {
+        Set<Integer> numbers = new HashSet<>();
+        while (numbers.size() != 16) {
+            numbers.add((int) (Math.random() * 52));
+        }
+        return SpecificDeckRepresentation.fromOrderedList(new ArrayList<>(numbers));
+    }
+
+    public ImmutableList<Integer> getAces() {
         return aces;
     }
 
-    public Set<Integer> getKings() {
+    public ImmutableList<Integer> getKings() {
         return kings;
     }
 
-    public Set<Integer> getQueens() {
+    public ImmutableList<Integer> getQueens() {
         return queens;
     }
 
-    public Set<Integer> getJacks() {
+    public ImmutableList<Integer> getJacks() {
         return jacks;
     }
 
-    private Set<Integer> jacks;
-
-    private SpecificDeckRepresentation() {
-        aces = new HashSet<>();
-        kings = new HashSet<>();
-        queens = new HashSet<>();
-        jacks = new HashSet<>();
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                   .append(getAces())
+                   .append(getKings())
+                   .append(getQueens())
+                   .append(getJacks())
+                   .toHashCode();
     }
 
     @Override
@@ -58,16 +111,6 @@ public class SpecificDeckRepresentation {
     }
 
     @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                   .append(getAces())
-                   .append(getKings())
-                   .append(getQueens())
-                   .append(getJacks())
-                   .toHashCode();
-    }
-
-    @Override
     public String toString() {
         return toDeck().toString();
     }
@@ -83,62 +126,22 @@ public class SpecificDeckRepresentation {
         return orderedSet;
     }
 
-    public static SpecificDeckRepresentation fromOrderedList(List<Integer> orderedList)
-    {
-        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
-        deckRepresentation.aces.addAll(orderedList.subList(0,4));
-        deckRepresentation.kings.addAll(orderedList.subList(4,8));
-        deckRepresentation.queens.addAll(orderedList.subList(8,12));
-        deckRepresentation.jacks.addAll(orderedList.subList(12,16));
-        return deckRepresentation;
-    }
-
-    public static SpecificDeckRepresentation fromDeck(Deck deck)
-    {
-        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
-        for(int i=0; i<deck.size(); i++)
-        {
-            CardValue value = deck.get(i);
-            switch(value)
-            {
-                case ACE:
-                    deckRepresentation.aces.add(i);
-                    break;
-                case KING:
-                    deckRepresentation.kings.add(i);
-                    break;
-                case QUEEN:
-                    deckRepresentation.queens.add(i);
-                    break;
-                case JACK:
-                    deckRepresentation.jacks.add(i);
-                    break;
-            }
-        }
-        return deckRepresentation;
-    }
-
     public Deck toDeck()
     {
         Deck deck = new Deck();
-        for(int i=0;i<52;i++)
-        {
+        for (int i = 0; i < 52; i++) {
             deck.add(NON_FACE);
         }
-        for(Integer i : aces)
-        {
+        for (Integer i : aces) {
             deck.set(i, ACE);
         }
-        for(Integer i : kings)
-        {
+        for (Integer i : kings) {
             deck.set(i, KING);
         }
-        for(Integer i : queens)
-        {
+        for (Integer i : queens) {
             deck.set(i, QUEEN);
         }
-        for(Integer i : jacks)
-        {
+        for (Integer i : jacks) {
             deck.set(i, JACK);
         }
         return deck;
@@ -152,16 +155,6 @@ public class SpecificDeckRepresentation {
         test.addAll(queens);
         test.addAll(jacks);
         return test.size() == 16;
-    }
-
-    public static SpecificDeckRepresentation randomDeck()
-    {
-        Set<Integer> numbers = new HashSet<>();
-        while(numbers.size() != 16)
-        {
-            numbers.add((int) (Math.random()*52));
-        }
-        return SpecificDeckRepresentation.fromOrderedList(new ArrayList<>(numbers));
     }
 
 }

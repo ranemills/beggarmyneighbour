@@ -23,7 +23,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
                                                   .limit(INITIAL_DECKS)
                                                   .collect(Collectors.toList());
 
-        LOGGER.info("Top was: {}: {}", minimisedResults.get(0).getDeckRepresentation(), minimisedResults.get(0).getTricks());
+        LOGGER.info("Top of top 100 was:    {}: {}", minimisedResults.get(0).getDeckRepresentation(), minimisedResults.get(0).getTricks());
         LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size()-1).getDeckRepresentation(), minimisedResults.get(minimisedResults.size()-1).getTricks());
 
         List<SpecificDeckRepresentation> decks;

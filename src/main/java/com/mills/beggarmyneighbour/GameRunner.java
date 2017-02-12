@@ -8,30 +8,21 @@ import com.mills.beggarmyneighbour.ga.RandomDeckMutationStrategy;
 import com.mills.beggarmyneighbour.ga.SelectionStrategy;
 import com.mills.beggarmyneighbour.ga.SwapPenaltyCardsMutationStrategy;
 import com.mills.beggarmyneighbour.ga.TopChildrenUnlessAllSameSelectionStrategy;
-import com.mills.beggarmyneighbour.game.GamePlay;
 import com.mills.beggarmyneighbour.game.GamePlayThread;
 import com.mills.beggarmyneighbour.game.GameStats;
-import com.mills.beggarmyneighbour.models.CardValue;
-import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
-import com.mills.beggarmyneighbour.repositories.GameStatsRepository;
 import com.mills.beggarmyneighbour.utils.CardOperations;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -82,31 +73,21 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         for (SpecificDeckRepresentation deck1 : decks) {
             if (Math.random() > 0.9) {
                 deck1 = mutationStrategy1.mutateDeck(deck1);
-            }
-            else if (Math.random() > 0.9) {
+            } else if (Math.random() > 0.9) {
                 deck1 = mutationStrategy2.mutateDeck(deck1);
             }
             for (SpecificDeckRepresentation deck2 : decks) {
-                if(deck1 == deck2)
-                {
+                if (deck1 == deck2) {
                     continue;
                 }
 
                 Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergedSpecificDeckRepresentations =
                     mergeStrategy.mergeDecks(deck1, deck2);
 
-//                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getLeft())) {
-                    newDecks.add(mergedSpecificDeckRepresentations.getLeft());
-//                }
-//                if (!processedDecks.contains(mergedSpecificDeckRepresentations.getRight())) {
-                    newDecks.add(mergedSpecificDeckRepresentations.getRight());
-//                }
+                newDecks.add(mergedSpecificDeckRepresentations.getLeft());
+                newDecks.add(mergedSpecificDeckRepresentations.getRight());
             }
         }
-
-//        for (SpecificDeckRepresentation deck : newDecks) {
-//            logger.debug("Generated new deck {}", deck);
-//        }
 
         newDecks = Sets.difference(newDecks, processedDecks);
 
@@ -130,32 +111,25 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         List<GamePlayThread> gamePlayThreads = new ArrayList<>();
 
         for (SpecificDeckRepresentation deck : decks) {
-            GamePlayThread gamePlayThread = new GamePlayThread(deck.toDeck());
+            GamePlayThread gamePlayThread = new GamePlayThread(deck);
             Thread thread = new Thread(gamePlayThread);
 
             thread.start();
 
             threads.add(thread);
             gamePlayThreads.add(gamePlayThread);
-
-//            results.add(generateAndPlayGame(deck.toDeck()));
         }
 
         logger.info("Spun up {} threads", threads.size());
 
-        for(int i=0; i<threads.size(); i++)
-        {
+        for (int i = 0; i < threads.size(); i++) {
             try {
                 threads.get(i).join();
                 results.add(gamePlayThreads.get(i).getGameStats());
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 logger.warn("Thread {} was interrupted. Deck was {}", i, decks.get(i));
             }
         }
-
-//        gameStatsRepository.save(results);
 
         return results;
     }
