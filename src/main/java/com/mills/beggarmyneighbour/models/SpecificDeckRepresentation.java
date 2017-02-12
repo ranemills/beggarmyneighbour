@@ -5,8 +5,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.mills.beggarmyneighbour.models.CardValue.ACE;
@@ -31,31 +33,30 @@ public class SpecificDeckRepresentation {
         deckRepresentation.aces = ImmutableList.<Integer>builder().addAll(orderedList.subList(0, 4)).build();
         deckRepresentation.kings = ImmutableList.<Integer>builder().addAll(orderedList.subList(4, 8)).build();
         deckRepresentation.queens = ImmutableList.<Integer>builder().addAll(orderedList.subList(8, 12)).build();
-        deckRepresentation.jacks = ImmutableList.<Integer>builder().addAll(orderedList.subList(8, 12)).build();
+        deckRepresentation.jacks = ImmutableList.<Integer>builder().addAll(orderedList.subList(12, 16)).build();
         return deckRepresentation;
     }
 
-    @Deprecated
     static SpecificDeckRepresentation fromDeck(Deck deck)
     {
-        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
+        Map<CardValue, List<Integer>> cards = new HashMap<>();
+        cards.put(ACE, new ArrayList<>());
+        cards.put(KING, new ArrayList<>());
+        cards.put(QUEEN, new ArrayList<>());
+        cards.put(JACK, new ArrayList<>());
+
         for (int i = 0; i < deck.size(); i++) {
             CardValue value = deck.get(i);
-            switch (value) {
-                case ACE:
-                    deckRepresentation.aces.add(i);
-                    break;
-                case KING:
-                    deckRepresentation.kings.add(i);
-                    break;
-                case QUEEN:
-                    deckRepresentation.queens.add(i);
-                    break;
-                case JACK:
-                    deckRepresentation.jacks.add(i);
-                    break;
-            }
+            if(value == NON_FACE) { continue; }
+            cards.get(value).add(i);
         }
+
+        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
+        deckRepresentation.aces = ImmutableList.copyOf(cards.get(ACE));
+        deckRepresentation.kings = ImmutableList.copyOf(cards.get(KING));
+        deckRepresentation.queens = ImmutableList.copyOf(cards.get(QUEEN));
+        deckRepresentation.jacks = ImmutableList.copyOf(cards.get(JACK));
+
         return deckRepresentation;
     }
 
