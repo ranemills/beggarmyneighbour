@@ -14,7 +14,7 @@ import static com.mills.beggarmyneighbour.GameRunner.INITIAL_DECKS;
 
 public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
-    private static final int NUMBER_TO_REPLACE = 10;
+    private static final int NUMBER_TO_REPLACE = 50;
     private static final Logger LOGGER = LoggerFactory.getLogger(TopChildrenUnlessAllSameSelectionStrategy.class);
 
     @Override
@@ -25,7 +25,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
         LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size()-1).getDeckRepresentation(), minimisedResults.get(minimisedResults.size()-1).getTricks());
 
         List<SpecificDeckRepresentation> decks;
-        if (minimisedResults.get(0).getTricks() - minimisedResults.get(minimisedResults.size()-1).getTricks() < 20)
+        if (minimisedResults.get(0).getTricks() - minimisedResults.get(minimisedResults.size()-1).getTricks() == 0)
         {
             decks = minimisedResults.stream()
                                     .limit(INITIAL_DECKS - NUMBER_TO_REPLACE)

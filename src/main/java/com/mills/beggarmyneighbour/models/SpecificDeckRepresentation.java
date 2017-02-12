@@ -88,10 +88,10 @@ public class SpecificDeckRepresentation {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                   .append(getAces())
-                   .append(getKings())
-                   .append(getQueens())
-                   .append(getJacks())
+                   .append(ImmutableList.sortedCopyOf(getAces()))
+                   .append(ImmutableList.sortedCopyOf(getKings()))
+                   .append(ImmutableList.sortedCopyOf(getQueens()))
+                   .append(ImmutableList.sortedCopyOf(getJacks()))
                    .toHashCode();
     }
 
@@ -104,10 +104,10 @@ public class SpecificDeckRepresentation {
         SpecificDeckRepresentation that = (SpecificDeckRepresentation) o;
 
         return new EqualsBuilder()
-                   .append(getAces(), that.getAces())
-                   .append(getKings(), that.getKings())
-                   .append(getQueens(), that.getQueens())
-                   .append(getJacks(), that.getJacks())
+                   .append(ImmutableList.sortedCopyOf(getAces()), ImmutableList.sortedCopyOf(that.getAces()))
+                   .append(ImmutableList.sortedCopyOf(getKings()), ImmutableList.sortedCopyOf(that.getKings()))
+                   .append(ImmutableList.sortedCopyOf(getQueens()), ImmutableList.sortedCopyOf(that.getQueens()))
+                   .append(ImmutableList.sortedCopyOf(getJacks()), ImmutableList.sortedCopyOf(that.getJacks()))
                    .isEquals();
     }
 

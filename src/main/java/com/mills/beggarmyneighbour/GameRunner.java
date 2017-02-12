@@ -30,14 +30,14 @@ import java.util.stream.Collectors;
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
-    public static final Player[] PLAYER_VALUES = Player.values();
-    public static final Integer INITIAL_DECKS = 75;
     // Constants
+    public static final Player[] PLAYER_VALUES = Player.values();
+    public static final Integer INITIAL_DECKS = 80;
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer ITERATIONS = 200;
+    private static final Integer ITERATIONS = 5000;
 
     // Store the decks we've dealt with
-    private Set<SpecificDeckRepresentation> processedDecks = new HashSet<>();
+    private Set<String> processedDecks = new HashSet<>();
 
     // Strategies
     private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
@@ -59,7 +59,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                 decks = getInitialDecks();
             }
 
-            processedDecks.addAll(decks);
+            processedDecks.addAll(decks.stream().map(SpecificDeckRepresentation::toString).collect(Collectors.toList()));
 
             List<GameStats> results = runGamesForDecks(decks);
 
@@ -87,11 +87,11 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         for (SpecificDeckRepresentation deck1 : decks) {
             if (Math.random() > 0.9) {
                 deck1 = mutationStrategy1.mutateDeck(deck1);
-            } else if (Math.random() > 0.99) {
+            } else if (Math.random() > 0.9) {
                 deck1 = mutationStrategy2.mutateDeck(deck1);
             }
             for (SpecificDeckRepresentation deck2 : decks) {
-                if (deck1 == deck2) {
+                if (deck1.equals(deck2)) {
                     continue;
                 }
 

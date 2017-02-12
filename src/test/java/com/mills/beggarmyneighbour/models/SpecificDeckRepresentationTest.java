@@ -77,8 +77,20 @@ class SpecificDeckRepresentationTest {
     @Test
     public void equality()
     {
-        SpecificDeckRepresentation left = SpecificDeckRepresentation.fromDeck(generateOrderedDeck());
-        SpecificDeckRepresentation right = SpecificDeckRepresentation.fromDeck(generateOrderedDeck());
+        ArrayList<Integer> leftInput = new ArrayList<>();
+        leftInput.addAll(Arrays.asList(44, 40, 48, 36));
+        leftInput.addAll(Arrays.asList(41, 37, 45, 49));
+        leftInput.addAll(Arrays.asList(42, 38, 46, 50));
+        leftInput.addAll(Arrays.asList(43, 39, 47, 51));
+
+        SpecificDeckRepresentation left = SpecificDeckRepresentation.fromOrderedList(leftInput);
+        ArrayList<Integer> rightInput = new ArrayList<>();
+        leftInput.addAll(Arrays.asList(40, 44, 48, 36));
+        leftInput.addAll(Arrays.asList(37, 41, 45, 49));
+        leftInput.addAll(Arrays.asList(38, 42, 46, 50));
+        leftInput.addAll(Arrays.asList(39, 43, 47, 51));
+
+        SpecificDeckRepresentation right = SpecificDeckRepresentation.fromOrderedList(leftInput);
 
         assertEquals(left, right);
     }

@@ -44,13 +44,4 @@ public class CrossOverMergeStrategy implements MergeStrategy {
 
         return Pair.of(newDeck1, newDeck2);
     }
-
-    private void crossOverLists(Deck deck1, Deck deck2, int index)
-    {
-        CardValue deck1Value = deck1.remove(index);
-        CardValue deck2Value = deck2.remove(index);
-
-        deck1.add(index, deck2Value);
-        deck2.add(index, deck1Value);
-    }
 }
