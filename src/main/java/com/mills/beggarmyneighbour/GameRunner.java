@@ -2,8 +2,10 @@ package com.mills.beggarmyneighbour;
 
 import com.mills.beggarmyneighbour.ga.CrossOverMergeStrategy;
 import com.mills.beggarmyneighbour.ga.MergeStrategy;
-import com.mills.beggarmyneighbour.ga.MoveKingMutationStrategy;
 import com.mills.beggarmyneighbour.ga.MutationStrategy;
+import com.mills.beggarmyneighbour.ga.RandomDeckMutationStrategy;
+import com.mills.beggarmyneighbour.ga.SelectionStrategy;
+import com.mills.beggarmyneighbour.ga.TopChildrenUnlessAllSameSelectionStrategy;
 import com.mills.beggarmyneighbour.game.GamePlay;
 import com.mills.beggarmyneighbour.game.GameStats;
 import com.mills.beggarmyneighbour.models.CardValue;
@@ -17,19 +19,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
@@ -37,18 +38,15 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
     private static final Integer INITIAL_DECKS = 100;
-    private static final Integer ITERATIONS = 500;
-    private static final Random RANDOM = new Random();
-
-    // Store the decks we've dealt with
-    private Set<Deck> processedDecks = new HashSet<>();
-
-    // Strategies
-    private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
-    private MutationStrategy mutationStrategy = new MoveKingMutationStrategy();
-
+    private static final Integer ITERATIONS = 20;
     // Fields to autowire
     private final GameStatsRepository gameStatsRepository;
+    // Store the decks we've dealt with
+    private Set<Deck> processedDecks = new HashSet<>();
+    // Strategies
+    private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
+    private MutationStrategy mutationStrategy = new RandomDeckMutationStrategy();
+    private SelectionStrategy selectionStrategy = new TopChildrenUnlessAllSameSelectionStrategy();
 
     @Autowired
     public GameRunner(GameStatsRepository gameStatsRepository) {
@@ -70,34 +68,21 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
      */
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
+        List<Deck> decks = new ArrayList<>();
         for (int i = 0; i < ITERATIONS; i++) {
-
-            int page = 1;
-            int pageRandom = RANDOM.nextInt(5);
-            if (pageRandom == 0) {
-                page = 2;
-            }
-            if (pageRandom == 1) {
-                page = 3;
-            }
-
-            Pageable pageRequest = new PageRequest(page, 10, Sort.Direction.DESC, "tricks");
-            Page<GameStats> response = gameStatsRepository.findAll(pageRequest);
-
-            Set<Deck> winningDecks = new HashSet<>();
-
-            for (GameStats stats : response) {
-                winningDecks.add(stats.getInitialDeck());
-            }
-
-            Set<Deck> decks = mergeDecks(winningDecks);
-
             if (decks.isEmpty()) {
                 decks = getInitialDecks();
-                processedDecks.addAll(decks);
             }
 
-            runGamesForDecks(decks);
+            processedDecks.addAll(decks);
+
+            List<GameStats> results = runGamesForDecks(decks);
+
+            logger.info("Iteration {}", i);
+            logger.info("Number of results {}", results.size());
+
+            decks = mergeDecks(selectionStrategy.selectFromResults(results));
+
         }
 
         for (GameStats stats : gameStatsRepository.findAll(new PageRequest(0, 1, Sort.Direction.DESC, "tricks"))) {
@@ -105,45 +90,44 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         }
     }
 
-    private Set<Deck> mergeDecks(Set<Deck> decks)
+    private List<Deck> mergeDecks(List<Deck> decks)
     {
         Set<Deck> newDecks = new HashSet<>();
         for (Deck deck1 : decks) {
             if (Math.random() > 0.9) {
-                mutationStrategy.mutateDeck(deck1);
-                logger.info("Mutation");
+                deck1 = mutationStrategy.mutateDeck(deck1);
+                logger.debug("Mutation");
             }
             for (Deck deck2 : decks) {
                 Pair<Deck, Deck> mergedDecks = mergeStrategy.mergeDecks(deck1, deck2);
 
-                if (!processedDecks.contains(mergedDecks.getLeft()) && !newDecks.contains(mergedDecks.getLeft())) {
+                if (!processedDecks.contains(mergedDecks.getLeft())) {
                     newDecks.add(mergedDecks.getLeft());
                 }
-                if (!processedDecks.contains(mergedDecks.getRight()) && !newDecks.contains(mergedDecks.getRight())) {
+                if (!processedDecks.contains(mergedDecks.getRight())) {
                     newDecks.add(mergedDecks.getRight());
                 }
             }
         }
 
         for (Deck deck : newDecks) {
-            logger.info("Generated new deck {}", deck);
+            logger.debug("Generated new deck {}", deck);
 
         }
 
-        processedDecks.addAll(decks);
-        return newDecks;
+        return new ArrayList<>(newDecks);
     }
 
-    private Set<Deck> getInitialDecks()
+    private List<Deck> getInitialDecks()
     {
-        Set<Deck> decks = new HashSet<>();
+        List<Deck> decks = new ArrayList<>();
         for (int i = 0; i < INITIAL_DECKS; i++) {
             decks.add(CardOperations.getShuffledDeck());
         }
         return decks;
     }
 
-    private void runGamesForDecks(Set<Deck> decks)
+    private List<GameStats> runGamesForDecks(List<Deck> decks)
     {
         List<GameStats> results = new ArrayList<>();
 
@@ -152,6 +136,8 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         }
 
         gameStatsRepository.save(results);
+
+        return results;
     }
 
 }
