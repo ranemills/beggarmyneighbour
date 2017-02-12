@@ -21,19 +21,20 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
     public static final Player[] PLAYER_VALUES = Player.values();
-
+    public static final Integer INITIAL_DECKS = 75;
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    public static final Integer INITIAL_DECKS = 75;
-    private static final Integer ITERATIONS = 5000;
+    private static final Integer ITERATIONS = 200;
 
     // Store the decks we've dealt with
     private Set<SpecificDeckRepresentation> processedDecks = new HashSet<>();
@@ -43,6 +44,8 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
     private MutationStrategy mutationStrategy1 = new SwapPenaltyCardsMutationStrategy();
     private MutationStrategy mutationStrategy2 = new RandomDeckMutationStrategy();
     private SelectionStrategy selectionStrategy = new TopChildrenUnlessAllSameSelectionStrategy();
+
+    private List<GameStats> topScores = new ArrayList<>();
 
     /**
      * This event is executed as late as conceivably possible to indicate that
@@ -60,10 +63,21 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
             List<GameStats> results = runGamesForDecks(decks);
 
+            List<GameStats> sortedResults = results.stream()
+                                                   .sorted(Comparator.comparing(GameStats::getTricks).reversed())
+                                                   .collect(Collectors.toList());
+
+            topScores.add(sortedResults.get(0));
+
             logger.info("Iteration {}", i);
             logger.info("Number of results {}", results.size());
 
-            decks = mergeDecks(selectionStrategy.selectFromResults(results));
+            decks = mergeDecks(selectionStrategy.selectFromResults(sortedResults));
+        }
+        logger.info("Iteration, Deck, Tricks, Cards");
+        for (int i = 0; i < topScores.size(); i++) {
+            logger.info("{}, {}, {}, {}", i, topScores.get(i).getDeckRepresentation(), topScores.get(i).getTricks(),
+                        topScores.get(i).getCards());
         }
     }
 

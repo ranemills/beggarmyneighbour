@@ -19,10 +19,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
 
     @Override
     public List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results) {
-        List<GameStats> minimisedResults = results.stream()
-                                                  .sorted(Comparator.comparing(GameStats::getTricks).reversed())
-                                                  .limit(INITIAL_DECKS)
-                                                  .collect(Collectors.toList());
+        List<GameStats> minimisedResults = results.subList(0, INITIAL_DECKS);
 
         LOGGER.info("Top of top 100 was:    {}: {}", minimisedResults.get(0).getDeckRepresentation(), minimisedResults.get(0).getTricks());
         LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size()-1).getDeckRepresentation(), minimisedResults.get(minimisedResults.size()-1).getTricks());
