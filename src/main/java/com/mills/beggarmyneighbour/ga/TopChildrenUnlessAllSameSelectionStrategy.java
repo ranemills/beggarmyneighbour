@@ -10,11 +10,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.mills.beggarmyneighbour.GameRunner.INITIAL_DECKS;
+
 public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
+    private static final int NUMBER_TO_REPLACE = 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(TopChildrenUnlessAllSameSelectionStrategy.class);
-
-    private static final int INITIAL_DECKS = 50;
 
     @Override
     public List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results) {
@@ -30,7 +31,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
         if (minimisedResults.get(0).getTricks() - minimisedResults.get(minimisedResults.size()-1).getTricks() < 20)
         {
             decks = minimisedResults.stream()
-                                    .limit(INITIAL_DECKS / 2)
+                                    .limit(INITIAL_DECKS - NUMBER_TO_REPLACE)
                                     .map(GameStats::getSpecificDeckRepresentation)
                                     .collect(Collectors.toList());
             while(decks.size() < INITIAL_DECKS) {

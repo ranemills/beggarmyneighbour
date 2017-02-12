@@ -15,8 +15,6 @@ import java.util.Random;
 public class CrossOverMergeStrategy implements MergeStrategy {
     private static final Random RANDOM = new Random();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CrossOverMergeStrategy.class);
-
     @Override
     public Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergeDecks(SpecificDeckRepresentation deck1,
                                                                                    SpecificDeckRepresentation deck2)

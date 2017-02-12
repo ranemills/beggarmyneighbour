@@ -32,7 +32,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
     // Constants
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer INITIAL_DECKS = 50;
+    public static final Integer INITIAL_DECKS = 75;
     private static final Integer ITERATIONS = 5000;
 
     // Store the decks we've dealt with
@@ -73,7 +73,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
         for (SpecificDeckRepresentation deck1 : decks) {
             if (Math.random() > 0.9) {
                 deck1 = mutationStrategy1.mutateDeck(deck1);
-            } else if (Math.random() > 0.9) {
+            } else if (Math.random() > 0.99) {
                 deck1 = mutationStrategy2.mutateDeck(deck1);
             }
             for (SpecificDeckRepresentation deck2 : decks) {
