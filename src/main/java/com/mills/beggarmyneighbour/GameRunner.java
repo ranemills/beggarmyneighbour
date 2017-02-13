@@ -85,11 +85,6 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
     {
         Set<SpecificDeckRepresentation> newDecks = new HashSet<>();
         for (SpecificDeckRepresentation deck1 : decks) {
-            if (Math.random() > 0.9) {
-                deck1 = mutationStrategy1.mutateDeck(deck1);
-            } else if (Math.random() > 0.9) {
-                deck1 = mutationStrategy2.mutateDeck(deck1);
-            }
             for (SpecificDeckRepresentation deck2 : decks) {
                 if (deck1.equals(deck2)) {
                     continue;
@@ -98,8 +93,18 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                 Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergedSpecificDeckRepresentations =
                     mergeStrategy.mergeDecks(deck1, deck2);
 
-                newDecks.add(mergedSpecificDeckRepresentations.getLeft());
-                newDecks.add(mergedSpecificDeckRepresentations.getRight());
+                SpecificDeckRepresentation newDeck1 = mergedSpecificDeckRepresentations.getLeft();
+                SpecificDeckRepresentation newDeck2 = mergedSpecificDeckRepresentations.getRight();
+
+                if (Math.random() > 0.9) {
+                    newDeck1 = mutationStrategy1.mutateDeck(newDeck1);
+                }
+                if (Math.random() > 0.9) {
+                    newDeck2 = mutationStrategy1.mutateDeck(newDeck2);
+                }
+
+                newDecks.add(newDeck1);
+                newDecks.add(newDeck2);
             }
         }
 
