@@ -32,12 +32,12 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
     // Constants
     public static final Player[] PLAYER_VALUES = Player.values();
-    public static final Integer INITIAL_DECKS = 80;
+    public static final Integer INITIAL_DECKS = 100;
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer ITERATIONS = 5000;
+    private static final Integer ITERATIONS = 200;
 
     // Store the decks we've dealt with
-    private Set<String> processedDecks = new HashSet<>();
+    private Set<SpecificDeckRepresentation> processedDecks = new HashSet<>();
 
     // Strategies
     private MergeStrategy mergeStrategy = new CrossOverMergeStrategy();
@@ -59,7 +59,7 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                 decks = getInitialDecks();
             }
 
-            processedDecks.addAll(decks.stream().map(SpecificDeckRepresentation::toString).collect(Collectors.toList()));
+            processedDecks.addAll(decks);
 
             List<GameStats> results = runGamesForDecks(decks);
 
