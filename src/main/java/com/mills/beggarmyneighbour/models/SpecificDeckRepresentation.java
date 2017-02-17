@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.mills.beggarmyneighbour.models.CardValue.ACE;
 import static com.mills.beggarmyneighbour.models.CardValue.JACK;
@@ -19,10 +20,15 @@ import static com.mills.beggarmyneighbour.models.CardValue.QUEEN;
 
 public class SpecificDeckRepresentation {
 
-    private ImmutableList<Integer> aces;
-    private ImmutableList<Integer> kings;
-    private ImmutableList<Integer> queens;
-    private ImmutableList<Integer> jacks;
+    private SpecificDeckRepresentation leftParent;
+    private SpecificDeckRepresentation rightParent;
+
+    private Map<Integer, Double> aces = new HashMap<>();
+    private Map<Integer, Double> kings = new HashMap<>();
+    private Map<Integer, Double> queens = new HashMap<>();
+    private Map<Integer, Double> jacks = new HashMap<>();
+
+    private int score;
 
     private SpecificDeckRepresentation() {
     }
@@ -30,32 +36,42 @@ public class SpecificDeckRepresentation {
     public static SpecificDeckRepresentation fromOrderedList(List<Integer> orderedList)
     {
         SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
-        deckRepresentation.aces = ImmutableList.<Integer>builder().addAll(orderedList.subList(0, 4)).build();
-        deckRepresentation.kings = ImmutableList.<Integer>builder().addAll(orderedList.subList(4, 8)).build();
-        deckRepresentation.queens = ImmutableList.<Integer>builder().addAll(orderedList.subList(8, 12)).build();
-        deckRepresentation.jacks = ImmutableList.<Integer>builder().addAll(orderedList.subList(12, 16)).build();
+
+        deckRepresentation.aces = toMapWithRandomFitness(orderedList.subList(0, 4));
+        deckRepresentation.kings = toMapWithRandomFitness(orderedList.subList(4, 8));
+        deckRepresentation.queens = toMapWithRandomFitness(orderedList.subList(8, 12));
+        deckRepresentation.jacks = toMapWithRandomFitness(orderedList.subList(12, 16));
         return deckRepresentation;
+    }
+
+    private static Map<Integer, Double> toMapWithRandomFitness(List<Integer> list)
+    {
+        return list.stream().collect(Collectors.toMap(x -> x, x -> Math.random()));
     }
 
     static SpecificDeckRepresentation fromDeck(Deck deck)
     {
-        Map<CardValue, List<Integer>> cards = new HashMap<>();
-        cards.put(ACE, new ArrayList<>());
-        cards.put(KING, new ArrayList<>());
-        cards.put(QUEEN, new ArrayList<>());
-        cards.put(JACK, new ArrayList<>());
+        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
 
         for (int i = 0; i < deck.size(); i++) {
             CardValue value = deck.get(i);
-            if(value == NON_FACE) { continue; }
-            cards.get(value).add(i);
-        }
 
-        SpecificDeckRepresentation deckRepresentation = new SpecificDeckRepresentation();
-        deckRepresentation.aces = ImmutableList.copyOf(cards.get(ACE));
-        deckRepresentation.kings = ImmutableList.copyOf(cards.get(KING));
-        deckRepresentation.queens = ImmutableList.copyOf(cards.get(QUEEN));
-        deckRepresentation.jacks = ImmutableList.copyOf(cards.get(JACK));
+            switch (value) {
+                case KING:
+                    deckRepresentation.kings.put(i, Math.random());
+                    break;
+                case QUEEN:
+                    deckRepresentation.queens.put(i, Math.random());
+                    break;
+                case JACK:
+                    deckRepresentation.jacks.put(i, Math.random());
+                    break;
+                case ACE:
+                    deckRepresentation.aces.put(i, Math.random());
+                    break;
+            }
+
+        }
 
         return deckRepresentation;
     }
@@ -69,20 +85,48 @@ public class SpecificDeckRepresentation {
         return SpecificDeckRepresentation.fromOrderedList(new ArrayList<>(numbers));
     }
 
-    public ImmutableList<Integer> getAces() {
-        return aces;
+    public int getScore() {
+        return score;
     }
 
-    public ImmutableList<Integer> getKings() {
-        return kings;
+    public SpecificDeckRepresentation setScore(int score) {
+        this.score = score;
+        return this;
     }
 
-    public ImmutableList<Integer> getQueens() {
-        return queens;
+    public SpecificDeckRepresentation getLeftParent() {
+
+        return leftParent;
     }
 
-    public ImmutableList<Integer> getJacks() {
-        return jacks;
+    public SpecificDeckRepresentation setLeftParent(SpecificDeckRepresentation leftParent) {
+        this.leftParent = leftParent;
+        return this;
+    }
+
+    public SpecificDeckRepresentation getRightParent() {
+        return rightParent;
+    }
+
+    public SpecificDeckRepresentation setRightParent(SpecificDeckRepresentation rightParent) {
+        this.rightParent = rightParent;
+        return this;
+    }
+
+    public List<Integer> getAces() {
+        return ImmutableList.copyOf(aces.keySet());
+    }
+
+    public List<Integer> getKings() {
+        return ImmutableList.copyOf(kings.keySet());
+    }
+
+    public List<Integer> getQueens() {
+        return ImmutableList.copyOf(queens.keySet());
+    }
+
+    public List<Integer> getJacks() {
+        return ImmutableList.copyOf(jacks.keySet());
     }
 
     @Override
@@ -119,10 +163,10 @@ public class SpecificDeckRepresentation {
     public List<Integer> toList()
     {
         List<Integer> orderedSet = new ArrayList<>();
-        orderedSet.addAll(aces);
-        orderedSet.addAll(kings);
-        orderedSet.addAll(queens);
-        orderedSet.addAll(jacks);
+        orderedSet.addAll(aces.keySet());
+        orderedSet.addAll(kings.keySet());
+        orderedSet.addAll(queens.keySet());
+        orderedSet.addAll(jacks.keySet());
 
         return orderedSet;
     }
@@ -131,11 +175,17 @@ public class SpecificDeckRepresentation {
     {
         Deck deck = new Deck();
         for (int i = 0; i < 52; i++) {
-            if(aces.contains(i)) { deck.add(ACE); }
-            else if(kings.contains(i)) { deck.add(KING); }
-            else if(queens.contains(i)) { deck.add(QUEEN); }
-            else if(jacks.contains(i)) { deck.add(JACK); }
-            else { deck.add(NON_FACE); }
+            if (aces.keySet().contains(i)) {
+                deck.add(ACE);
+            } else if (kings.keySet().contains(i)) {
+                deck.add(KING);
+            } else if (queens.keySet().contains(i)) {
+                deck.add(QUEEN);
+            } else if (jacks.keySet().contains(i)) {
+                deck.add(JACK);
+            } else {
+                deck.add(NON_FACE);
+            }
         }
         return deck;
     }
@@ -143,10 +193,10 @@ public class SpecificDeckRepresentation {
     public Boolean isValid()
     {
         Set<Integer> test = new HashSet<>();
-        test.addAll(aces);
-        test.addAll(kings);
-        test.addAll(queens);
-        test.addAll(jacks);
+        test.addAll(aces.keySet());
+        test.addAll(kings.keySet());
+        test.addAll(queens.keySet());
+        test.addAll(jacks.keySet());
         return test.size() == 16;
     }
 
