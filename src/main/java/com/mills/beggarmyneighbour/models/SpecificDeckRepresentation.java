@@ -131,19 +131,11 @@ public class SpecificDeckRepresentation {
     {
         Deck deck = new Deck();
         for (int i = 0; i < 52; i++) {
-            deck.add(NON_FACE);
-        }
-        for (Integer i : aces) {
-            deck.set(i, ACE);
-        }
-        for (Integer i : kings) {
-            deck.set(i, KING);
-        }
-        for (Integer i : queens) {
-            deck.set(i, QUEEN);
-        }
-        for (Integer i : jacks) {
-            deck.set(i, JACK);
+            if(aces.contains(i)) { deck.add(ACE); }
+            else if(kings.contains(i)) { deck.add(KING); }
+            else if(queens.contains(i)) { deck.add(QUEEN); }
+            else if(jacks.contains(i)) { deck.add(JACK); }
+            else { deck.add(NON_FACE); }
         }
         return deck;
     }

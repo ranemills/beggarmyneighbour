@@ -22,8 +22,6 @@ public class GameStats {
     private final int cards;
     @Field
     private final Player winner;
-    @Field
-    private Deck initialDeck;
     @Id
     private String deckRepresentation;
     @Transient
@@ -40,18 +38,9 @@ public class GameStats {
     }
 
     public GameStats setSpecificDeckRepresentation(SpecificDeckRepresentation specificDeckRepresentation) {
-        setInitialDeck(specificDeckRepresentation.toDeck());
+        this.deckRepresentation = specificDeckRepresentation.toString();
         this.specificDeckRepresentation = specificDeckRepresentation;
         return this;
-    }
-
-    private String initialDeckToString()
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (CardValue value : initialDeck) {
-            stringBuilder.append(value.getAsciiChar());
-        }
-        return stringBuilder.toString();
     }
 
     @Override
@@ -60,7 +49,7 @@ public class GameStats {
                    .append("tricks", tricks)
                    .append("cards", cards)
                    .append("winner", winner)
-                   .append("initialDeck", initialDeck.toString())
+                   .append("initialDeck", deckRepresentation)
                    .toString();
     }
 
@@ -74,16 +63,6 @@ public class GameStats {
 
     public Player getWinner() {
         return winner;
-    }
-
-    public Deck getInitialDeck() {
-        return initialDeck;
-    }
-
-    public void setInitialDeck(Deck initialDeck)
-    {
-        this.initialDeck = initialDeck;
-        this.deckRepresentation = initialDeckToString();
     }
 
     public String getDeckRepresentation() {
