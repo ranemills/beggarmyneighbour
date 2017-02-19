@@ -29,6 +29,8 @@ public class GamePlayThread
         Map<Player, Deque<CardValue>> playerHands = CardOperations.splitCards(deck.toDeck());
 
         gameStats = GamePlay.playGame(playerHands);
+
+        deck.setScore(gameStats.getTricks());
         gameStats.setSpecificDeckRepresentation(deck);
     }
 }

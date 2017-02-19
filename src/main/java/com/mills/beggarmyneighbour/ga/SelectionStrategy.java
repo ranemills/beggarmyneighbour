@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface SelectionStrategy {
 
-    List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results);
+    List<SpecificDeckRepresentation> selectFromResults(List<SpecificDeckRepresentation> results);
 
 }

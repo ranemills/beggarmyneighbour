@@ -10,6 +10,7 @@ import com.mills.beggarmyneighbour.ga.SwapPenaltyCardsMutationStrategy;
 import com.mills.beggarmyneighbour.ga.TopChildrenUnlessAllSameSelectionStrategy;
 import com.mills.beggarmyneighbour.game.GamePlayThread;
 import com.mills.beggarmyneighbour.game.GameStats;
+import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Player;
 import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 import com.mills.beggarmyneighbour.utils.CardOperations;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,21 +65,60 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
 
             List<GameStats> results = runGamesForDecks(decks);
 
-            List<GameStats> sortedResults = results.stream()
-                                                   .sorted(Comparator.comparing(GameStats::getTricks).reversed())
-                                                   .collect(Collectors.toList());
+            List<SpecificDeckRepresentation> sortedDeckResults = decks.stream()
+                                                                      .sorted(Comparator.comparing(SpecificDeckRepresentation::getScore).reversed())
+                                                                      .collect(Collectors.toList());
 
-            topScores.add(sortedResults.get(0));
+            topScores.add(results.stream()
+                                 .sorted(Comparator.comparing(GameStats::getTricks).reversed())
+                                 .findFirst()
+                                 .get());
+
+            updateGeneScores(decks);
 
             logger.info("Iteration {}", i);
             logger.info("Number of results {}", results.size());
 
-            decks = mergeDecks(selectionStrategy.selectFromResults(sortedResults));
+            decks = mergeDecks(selectionStrategy.selectFromResults(sortedDeckResults));
         }
         logger.info("Iteration, Deck, Tricks, Cards");
         for (int i = 0; i < topScores.size(); i++) {
             logger.info("{}, {}, {}, {}", i, topScores.get(i).getDeckRepresentation(), topScores.get(i).getTricks(),
                         topScores.get(i).getCards());
+        }
+    }
+
+    private void updateGeneScores(List<SpecificDeckRepresentation> decks)
+    {
+        for(SpecificDeckRepresentation deck : decks)
+        {
+            if(deck.getLeftParent() != null && deck.getScore() > deck.getLeftParent().getScore()) {
+                updateGeneScore(deck, deck.getLeftParent());
+            }
+
+            if(deck.getRightParent() != null && deck.getScore() > deck.getRightParent().getScore()) {
+                updateGeneScore(deck, deck.getRightParent());
+            }
+        }
+    }
+
+    private void updateGeneScore(SpecificDeckRepresentation deck, SpecificDeckRepresentation parent)
+    {
+        double scoreDifference = deck.getScore() - parent.getScore();
+        double scoreAdjustment = scoreDifference / 100;
+
+        for(CardValue value : EnumSet.complementOf(EnumSet.of(CardValue.NON_FACE)))
+        {
+            List<Integer> deckCards = deck.get(value);
+            List<Integer> parentDeckCards = parent.get(value);
+            for(Integer deckCard : deckCards)
+            {
+                if(parentDeckCards.contains(deckCard))
+                {
+                    double geneScore = deck.getGeneScore(value, deckCard);
+                    deck.updateGeneScore(value, deckCard, geneScore + scoreAdjustment);
+                }
+            }
         }
     }
 
@@ -90,21 +131,14 @@ public class GameRunner implements ApplicationListener<ApplicationReadyEvent> {
                     continue;
                 }
 
-                Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergedSpecificDeckRepresentations =
-                    mergeStrategy.mergeDecks(deck1, deck2);
-
-                SpecificDeckRepresentation newDeck1 = mergedSpecificDeckRepresentations.getLeft();
-                SpecificDeckRepresentation newDeck2 = mergedSpecificDeckRepresentations.getRight();
-
-                if (Math.random() > 0.9) {
-                    newDeck1 = mutationStrategy1.mutateDeck(newDeck1);
+                for(SpecificDeckRepresentation newDeck : mergeStrategy.mergeDecks(deck1, deck2)) {
+                    if (Math.random() > 0.9) {
+                        newDeck = mutationStrategy1.mutateDeck(newDeck);
+                        newDeck.setLeftParent(deck1);
+                        newDeck.setRightParent(deck2);
+                        newDecks.add(newDeck);
+                    }
                 }
-                if (Math.random() > 0.9) {
-                    newDeck2 = mutationStrategy1.mutateDeck(newDeck2);
-                }
-
-                newDecks.add(newDeck1);
-                newDecks.add(newDeck2);
             }
         }
 

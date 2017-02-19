@@ -1,6 +1,5 @@
 package com.mills.beggarmyneighbour.ga;
 
-import com.mills.beggarmyneighbour.game.GameStats;
 import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
 import com.mills.beggarmyneighbour.utils.CardOperations;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -20,38 +19,30 @@ public class TopChildrenUnlessAllSameSelectionStrategy
     private MutablePair<Integer, Integer> tricksToCount = MutablePair.of(0, 0);
 
     @Override
-    public List<SpecificDeckRepresentation> selectFromResults(List<GameStats> results) {
-        List<GameStats> minimisedResults = results.subList(0, INITIAL_DECKS);
+    public List<SpecificDeckRepresentation> selectFromResults(List<SpecificDeckRepresentation> results) {
+        List<SpecificDeckRepresentation> minimisedResults = results.subList(0, INITIAL_DECKS);
 
-        LOGGER.info("Top of top 100 was:    {}: {}", minimisedResults.get(0).getDeckRepresentation(),
-                    minimisedResults.get(0).getTricks());
-        LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size() - 1)
-                                                                     .getDeckRepresentation(), minimisedResults.get(minimisedResults.size() - 1).getTricks());
+        LOGGER.info("Top of top 100 was:    {}", minimisedResults.get(0).toString());
+        LOGGER.info("Bottom of top 100 was: {}", minimisedResults.get(minimisedResults.size() - 1).toString());
 
-        if (tricksToCount.getLeft().equals(minimisedResults.get(0).getTricks())) {
+        if (tricksToCount.getLeft().equals(minimisedResults.get(0).getScore())) {
             tricksToCount.setRight(tricksToCount.getRight() + 1);
         } else {
-            tricksToCount = MutablePair.of(minimisedResults.get(0).getTricks(), 1);
+            tricksToCount = MutablePair.of(minimisedResults.get(0).getScore(), 1);
         }
 
         boolean shakeUpRequired = tricksToCount.getRight() > 5;
 
-        List<SpecificDeckRepresentation> decks;
-        if (minimisedResults.get(0).getTricks() - minimisedResults.get(minimisedResults.size() - 1).getTricks() == 0 ||
+        List<SpecificDeckRepresentation> decks = minimisedResults;
+        if (minimisedResults.get(0).getScore() - minimisedResults.get(minimisedResults.size() - 1).getScore() == 0 ||
             shakeUpRequired)
         {
             decks = minimisedResults.stream()
                                     .limit(INITIAL_DECKS - NUMBER_TO_REPLACE)
-                                    .map(GameStats::getSpecificDeckRepresentation)
                                     .collect(Collectors.toList());
             while (decks.size() < INITIAL_DECKS) {
                 decks.add(CardOperations.getShuffledDeck());
             }
-        } else {
-
-            decks = minimisedResults.stream()
-                                    .map(GameStats::getSpecificDeckRepresentation)
-                                    .collect(Collectors.toList());
         }
         return decks;
     }

@@ -1,5 +1,6 @@
 package com.mills.beggarmyneighbour.ga;
 
+import com.google.common.collect.ImmutableList;
 import com.mills.beggarmyneighbour.models.CardValue;
 import com.mills.beggarmyneighbour.models.Deck;
 import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -16,8 +18,8 @@ public class CrossOverMergeStrategy implements MergeStrategy {
     private static final Random RANDOM = new Random();
 
     @Override
-    public Pair<SpecificDeckRepresentation, SpecificDeckRepresentation> mergeDecks(SpecificDeckRepresentation deck1,
-                                                                                   SpecificDeckRepresentation deck2)
+    public Collection<SpecificDeckRepresentation> mergeDecks(SpecificDeckRepresentation deck1,
+                                                                                         SpecificDeckRepresentation deck2)
     {
         List<Integer> deck1Rep = deck1.toList();
         List<Integer> deck2Rep = deck2.toList();
@@ -42,6 +44,6 @@ public class CrossOverMergeStrategy implements MergeStrategy {
         SpecificDeckRepresentation newDeck2 = SpecificDeckRepresentation.fromOrderedList(deck2Rep);
 
 
-        return Pair.of(newDeck1, newDeck2);
+        return ImmutableList.of(newDeck1, newDeck2);
     }
 }

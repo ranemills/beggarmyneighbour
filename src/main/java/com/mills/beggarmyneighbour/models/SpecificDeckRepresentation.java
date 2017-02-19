@@ -3,8 +3,11 @@ package com.mills.beggarmyneighbour.models;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +34,43 @@ public class SpecificDeckRepresentation {
     private int score;
 
     private SpecificDeckRepresentation() {
+    }
+
+    public void updateGeneScore(CardValue cardValue, Integer location, double newGeneScore)
+    {
+        switch(cardValue)
+        {
+            case ACE:
+                aces.put(location, newGeneScore);
+                break;
+            case KING:
+                kings.put(location, newGeneScore);
+                break;
+            case QUEEN:
+                queens.put(location, newGeneScore);
+                break;
+            case JACK:
+                jacks.put(location, newGeneScore);
+                break;
+        }
+    }
+
+    public Double getGeneScore(CardValue cardValue, Integer location)
+    {
+        switch(cardValue)
+        {
+            case ACE:
+                return aces.get(location);
+            case KING:
+                return kings.get(location);
+            case QUEEN:
+                return queens.get(location);
+            case JACK:
+                return jacks.get(location);
+            default:
+                return null;
+
+        }
     }
 
     public static SpecificDeckRepresentation fromOrderedList(List<Integer> orderedList)
@@ -129,6 +169,18 @@ public class SpecificDeckRepresentation {
         return ImmutableList.copyOf(jacks.keySet());
     }
 
+    public List<Integer> get(CardValue value)
+    {
+        switch(value)
+        {
+            case ACE: return getAces();
+            case KING: return getKings();
+            case QUEEN: return getQueens();
+            case JACK: return getJacks();
+            default: return null;
+        }
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
@@ -157,7 +209,7 @@ public class SpecificDeckRepresentation {
 
     @Override
     public String toString() {
-        return toDeck().toString();
+        return toDeck().toString() + ":" + getScore();
     }
 
     public List<Integer> toList()
@@ -198,6 +250,37 @@ public class SpecificDeckRepresentation {
         test.addAll(queens.keySet());
         test.addAll(jacks.keySet());
         return test.size() == 16;
+    }
+
+    public Map<Integer, Double> getCards(CardValue cardValue)
+    {
+        switch(cardValue)
+        {
+            case ACE: return aces;
+            case KING: return kings;
+            case QUEEN: return queens;
+            case JACK: return jacks;
+            default: return Collections.emptyMap();
+        }
+    }
+
+
+    public List<Pair<Integer, Double>> getAll()
+    {
+        List<Pair<Integer, Double>> all = new ArrayList<>();
+        for(CardValue cardValue : EnumSet.complementOf(EnumSet.of(NON_FACE)))
+        {
+            for(Map.Entry<Integer, Double> entry : getCards(cardValue).entrySet())
+            {
+                all.add(Pair.of(entry.getKey(), entry.getValue()));
+            }
+        }
+        return all;
+    }
+
+    public static SpecificDeckRepresentation fromPairList(List<Pair<Integer, Double>> pairList)
+    {
+
     }
 
 }
