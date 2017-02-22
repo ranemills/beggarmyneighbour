@@ -1,7 +1,6 @@
-package com.mills.beggarmyneighbour.ga;
+package com.mills.beggarmyneighbour.ga2;
 
-import com.mills.beggarmyneighbour.models.SpecificDeckRepresentation;
-import com.mills.beggarmyneighbour.utils.CardOperations;
+import com.mills.beggarmyneighbour.models.DeckOfGenes;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mills.beggarmyneighbour.GameRunner.INITIAL_DECKS;
+import static com.mills.beggarmyneighbour.run.GameRunner.INITIAL_DECKS;
 
 public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
@@ -19,11 +18,11 @@ public class TopChildrenUnlessAllSameSelectionStrategy
     private MutablePair<Integer, Integer> tricksToCount = MutablePair.of(0, 0);
 
     @Override
-    public List<SpecificDeckRepresentation> selectFromResults(List<SpecificDeckRepresentation> results) {
-        List<SpecificDeckRepresentation> minimisedResults = results.subList(0, INITIAL_DECKS);
+    public List<DeckOfGenes> selectFromResults(List<DeckOfGenes> results) {
+        List<DeckOfGenes> minimisedResults = results.subList(0, INITIAL_DECKS);
 
-        LOGGER.info("Top of top 100 was:    {}", minimisedResults.get(0).toString());
-        LOGGER.info("Bottom of top 100 was: {}", minimisedResults.get(minimisedResults.size() - 1).toString());
+        LOGGER.info("Top of top 100 was:    {}: {}", minimisedResults.get(0).getScore(), minimisedResults.get(0).toDeck());
+        LOGGER.info("Bottom of top 100 was: {}: {}", minimisedResults.get(minimisedResults.size() - 1).getScore(), minimisedResults.get(minimisedResults.size() - 1).toDeck());
 
         if (tricksToCount.getLeft().equals(minimisedResults.get(0).getScore())) {
             tricksToCount.setRight(tricksToCount.getRight() + 1);
@@ -33,15 +32,16 @@ public class TopChildrenUnlessAllSameSelectionStrategy
 
         boolean shakeUpRequired = tricksToCount.getRight() > 5;
 
-        List<SpecificDeckRepresentation> decks = minimisedResults;
+        List<DeckOfGenes> decks = minimisedResults;
         if (minimisedResults.get(0).getScore() - minimisedResults.get(minimisedResults.size() - 1).getScore() == 0 ||
             shakeUpRequired)
         {
+            LOGGER.info("Shaking up");
             decks = minimisedResults.stream()
                                     .limit(INITIAL_DECKS - NUMBER_TO_REPLACE)
                                     .collect(Collectors.toList());
             while (decks.size() < INITIAL_DECKS) {
-                decks.add(CardOperations.getShuffledDeck());
+                decks.add(DeckOfGenes.randomDeckOfGenes());
             }
         }
         return decks;

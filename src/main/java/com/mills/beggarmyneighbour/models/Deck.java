@@ -13,6 +13,11 @@ public class Deck
         super(deck);
     }
 
+    public Deck(List<CardValue> list)
+    {
+        super(list);
+    }
+
     public Deck() {
         super();
     }

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.mills.beggarmyneighbour.GameRunner.PLAYER_VALUES;
+import static com.mills.beggarmyneighbour.run.GameRunner.PLAYER_VALUES;
 
 public class GamePlay {
     private Iterator<Player> playerIterator = Iterables.cycle(PLAYER_VALUES).iterator();
