@@ -12,7 +12,9 @@ import static com.mills.beggarmyneighbour.run.GameRunner.INITIAL_DECKS;
 
 public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
-    private static final int NUMBER_TO_REPLACE = 80;
+    private static final int NUMBER_TO_REPLACE = 50;
+    private static final int SHAKE_UP_REQUIRED_THRESHOLD = 20;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TopChildrenUnlessAllSameSelectionStrategy.class);
 
     private MutablePair<Integer, Integer> tricksToCount = MutablePair.of(0, 0);
@@ -30,7 +32,7 @@ public class TopChildrenUnlessAllSameSelectionStrategy
             tricksToCount = MutablePair.of(minimisedResults.get(0).getScore(), 1);
         }
 
-        boolean shakeUpRequired = tricksToCount.getRight() > 5;
+        boolean shakeUpRequired = tricksToCount.getRight() > SHAKE_UP_REQUIRED_THRESHOLD;
 
         List<DeckOfGenes> decks = minimisedResults;
         if (minimisedResults.get(0).getScore() - minimisedResults.get(minimisedResults.size() - 1).getScore() == 0 ||

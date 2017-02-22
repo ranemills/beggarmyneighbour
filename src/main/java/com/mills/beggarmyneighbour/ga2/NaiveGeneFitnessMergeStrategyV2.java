@@ -12,10 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 
-public class NaiveGeneFitnessMergeStrategy implements MergeStrategy {
-    private static final Logger LOG = LoggerFactory.getLogger(NaiveGeneFitnessMergeStrategy.class);
+public class NaiveGeneFitnessMergeStrategyV2 implements MergeStrategy {
+    private static final Logger LOG = LoggerFactory.getLogger(NaiveGeneFitnessMergeStrategyV2.class);
     private static List<CardValue> allCardValueAsList = new ArrayList<>(EnumSet.allOf(CardValue.class));
 
     @Override
@@ -40,26 +39,24 @@ public class NaiveGeneFitnessMergeStrategy implements MergeStrategy {
             newDeck.add(cardToAdd);
             if(!newDeck.isValid())
             {
-                newDeck.remove(cardToAdd);
-                Collections.shuffle(allCardValueAsList);
-                for(CardValue cardValue :  allCardValueAsList)
-                {
-                    for (; i < deck1.size(); i++) {
-                        Pair<CardValue, Double> newCard = Pair.of(cardValue, Math.random());
-                        newDeck.add(newCard);
-                        if(!newDeck.isValid())
-                        {
-                            newDeck.remove(newCard);
-                            break;
-                        }
-                    }
-                    if(i == deck1.size())
-                    {
-                        break;
-                    }
-                }
+                replaceBadCardWithGoodCard(newDeck, cardToAdd);
             }
         }
         return ImmutableList.of(newDeck);
+    }
+
+    private void replaceBadCardWithGoodCard(DeckOfGenes newDeck, Pair<CardValue, Double> cardToAdd) {
+        newDeck.remove(cardToAdd);
+        Collections.shuffle(allCardValueAsList);
+        for(CardValue cardValue :  allCardValueAsList)
+        {
+            Pair<CardValue, Double> newCard = Pair.of(cardValue, Math.random());
+            newDeck.add(newCard);
+            if(newDeck.isValid())
+            {
+                break;
+            }
+            newDeck.remove(newCard);
+        }
     }
 }

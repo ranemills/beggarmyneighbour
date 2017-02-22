@@ -1,6 +1,7 @@
 package com.mills.beggarmyneighbour.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,12 +25,10 @@ public class Deck
 
     public Boolean isValidDeck()
     {
-        Deck deck = new Deck(this);
-        for(CardValue cardValue : EnumSet.allOf(CardValue.class))
-        {
-            for(int i=0; i<cardValue.getRequiredInDeck(); i++)
-            {
-                if(!deck.remove(cardValue)) { return false; }
+        for (CardValue cardValue : EnumSet.allOf(CardValue.class)) {
+            int frequency = Collections.frequency(this, cardValue);
+            if (frequency > cardValue.getRequiredInDeck()) {
+                return false;
             }
         }
         return true;

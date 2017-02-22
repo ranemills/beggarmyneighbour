@@ -26,6 +26,15 @@ public class DeckOfGenes
 
     private Deck cachedDeck;
 
+    public DeckOfGenes()
+    {
+        super();
+    }
+
+    public DeckOfGenes(Collection<? extends Pair<CardValue, Double>> collection) {
+        super(collection);
+    }
+
     public static DeckOfGenes randomDeckOfGenes()
     {
         DeckOfGenes deck = new DeckOfGenes();
@@ -61,8 +70,7 @@ public class DeckOfGenes
 
     public Deck toDeck()
     {
-        if(cachedDeck == null)
-        {
+        if (cachedDeck == null) {
             cachedDeck = new Deck(this.stream().map(Pair::getKey).collect(Collectors.toList()));
         }
         return cachedDeck;
@@ -70,11 +78,9 @@ public class DeckOfGenes
 
     public boolean isValid()
     {
-        for(CardValue cardValue : EnumSet.allOf(CardValue.class))
-        {
+        for (CardValue cardValue : EnumSet.allOf(CardValue.class)) {
             int frequency = Collections.frequency(toDeck(), cardValue);
-            if(frequency > cardValue.getRequiredInDeck())
-            {
+            if (frequency > cardValue.getRequiredInDeck()) {
                 return false;
             }
         }
@@ -100,6 +106,14 @@ public class DeckOfGenes
     }
 
     @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                   .append(toDeck())
+                   .append(getScore())
+                   .toHashCode();
+    }
+
+    @Override
     public boolean add(Pair<CardValue, Double> value)
     {
         cachedDeck = null;
@@ -110,13 +124,5 @@ public class DeckOfGenes
     public boolean addAll(Collection<? extends Pair<CardValue, Double>> collection) {
         cachedDeck = null;
         return super.addAll(collection);
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                   .append(toDeck())
-                   .append(getScore())
-                   .toHashCode();
     }
 }

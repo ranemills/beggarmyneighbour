@@ -2,6 +2,8 @@ package com.mills.beggarmyneighbour.run;
 
 import com.mills.beggarmyneighbour.ga2.MergeStrategy;
 import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategy;
+import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategyV2;
+import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategyV3;
 import com.mills.beggarmyneighbour.ga2.SelectionStrategy;
 import com.mills.beggarmyneighbour.ga2.TopChildrenUnlessAllSameSelectionStrategy;
 import com.mills.beggarmyneighbour.game.GamePlayThread;
@@ -30,7 +32,7 @@ public class GameRunner {
     private static final Integer ITERATIONS = 200;
 
     // Strategies
-    private MergeStrategy mergeStrategy = new NaiveGeneFitnessMergeStrategy();
+    private MergeStrategy mergeStrategy = new NaiveGeneFitnessMergeStrategyV3();
     private SelectionStrategy selectionStrategy = new TopChildrenUnlessAllSameSelectionStrategy();
 
     private List<Pair<Deck, Integer>> topScores = new ArrayList<>();
@@ -57,7 +59,7 @@ public class GameRunner {
 
             decks = mergeDecks(selectionStrategy.selectFromResults(sortedDeckResults));
         }
-        logger.info("Iteration, Deck, Tricks, Cards");
+        logger.info("Iteration, Deck, Tricks");
         for (int i = 0; i < topScores.size(); i++) {
             logger.info("{}, {}, {}", i, topScores.get(i).getKey(), topScores.get(i).getValue());
         }
