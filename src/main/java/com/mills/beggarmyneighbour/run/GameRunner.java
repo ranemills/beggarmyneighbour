@@ -1,8 +1,6 @@
 package com.mills.beggarmyneighbour.run;
 
 import com.mills.beggarmyneighbour.ga2.MergeStrategy;
-import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategy;
-import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategyV2;
 import com.mills.beggarmyneighbour.ga2.NaiveGeneFitnessMergeStrategyV3;
 import com.mills.beggarmyneighbour.ga2.SelectionStrategy;
 import com.mills.beggarmyneighbour.ga2.TopChildrenUnlessAllSameSelectionStrategy;
@@ -29,7 +27,7 @@ public class GameRunner {
     public static final Player[] PLAYER_VALUES = Player.values();
     public static final Integer INITIAL_DECKS = 100;
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer ITERATIONS = 200;
+    private static final Integer ITERATIONS = 50;
 
     // Strategies
     private MergeStrategy mergeStrategy = new NaiveGeneFitnessMergeStrategyV3();
@@ -38,7 +36,7 @@ public class GameRunner {
     private List<Pair<Deck, Integer>> topScores = new ArrayList<>();
 
     public void run() {
-        List<DeckOfGenes> decks = new ArrayList<>() ;
+        List<DeckOfGenes> decks = new ArrayList<>();
         for (int i = 0; i < ITERATIONS; i++) {
             if (decks.isEmpty()) {
                 decks = getInitialDecks();
@@ -99,8 +97,7 @@ public class GameRunner {
                     newDeck.addParent(deck1.toDeck(), deck1.getScore());
                     newDeck.addParent(deck2.toDeck(), deck2.getScore());
 
-                    if(Math.random() > 0.95)
-                    {
+                    if (Math.random() > 0.95) {
                         int i = (int) (Math.random() * 51);
                         int j = (int) (Math.random() * 51);
                         Collections.swap(newDeck, i, j);
