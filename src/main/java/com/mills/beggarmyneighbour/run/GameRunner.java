@@ -25,9 +25,9 @@ public class GameRunner {
 
     // Constants
     public static final Player[] PLAYER_VALUES = Player.values();
-    public static final Integer INITIAL_DECKS = 100;
+    public static final int INITIAL_DECKS = 100;
     private static final Logger logger = LoggerFactory.getLogger(GameRunner.class);
-    private static final Integer ITERATIONS = 50;
+    private static final int ITERATIONS = 1000;
 
     // Strategies
     private MergeStrategy mergeStrategy = new NaiveGeneFitnessMergeStrategyV3();

@@ -12,8 +12,8 @@ import static com.mills.beggarmyneighbour.run.GameRunner.INITIAL_DECKS;
 
 public class TopChildrenUnlessAllSameSelectionStrategy
     implements SelectionStrategy {
-    private static final int NUMBER_TO_REPLACE = 50;
-    private static final int SHAKE_UP_REQUIRED_THRESHOLD = 20;
+    private static final int NUMBER_TO_REPLACE = 95;
+    private static final int SHAKE_UP_REQUIRED_THRESHOLD = 10;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TopChildrenUnlessAllSameSelectionStrategy.class);
 

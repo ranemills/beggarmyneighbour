@@ -87,7 +87,7 @@ public class GamePlay {
         isPenalty = penaltyMode;
     }
 
-    Integer computeCardsToPlay(Deque<CardValue> deck) {
+    int computeCardsToPlay(Deque<CardValue> deck) {
         if (deck.isEmpty()) {
             return 1;
         } else {
@@ -108,7 +108,7 @@ public class GamePlay {
         return card;
     }
 
-    Boolean playCards(Deque<CardValue> deck, Deque<CardValue> playerHand, Integer cardsToPlay) {
+    Boolean playCards(Deque<CardValue> deck, Deque<CardValue> playerHand, int cardsToPlay) {
         for (int i = 0; i < cardsToPlay; i++) {
             numberCards++;
             if (playerHand.isEmpty()) {

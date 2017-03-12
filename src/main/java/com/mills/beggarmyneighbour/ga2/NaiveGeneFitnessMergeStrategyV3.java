@@ -27,7 +27,7 @@ public class NaiveGeneFitnessMergeStrategyV3 implements MergeStrategy {
         Map<Integer, Pair<CardValue, Double>> locationOfCards = new HashMap<>();
         List<CardValue> cardValuesInList = new ArrayList<>();
 
-        for(Integer i : random52())
+        for(int i : random52())
         {
             Pair<CardValue, Double> cardFromDeck1 = deck1.get(i);
             Pair<CardValue, Double> cardFromDeck2 = deck2.get(i);
